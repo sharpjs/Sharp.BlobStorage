@@ -9,8 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C6C045F4
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		General.props = General.props
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
+		Resolve-Version.ps1 = Resolve-Version.ps1
+		Version.props = Version.props
 	EndProjectSection
 EndProject
 Global
