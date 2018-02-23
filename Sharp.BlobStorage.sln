@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C6C045F4
 		Version.props = Version.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BlobStorage.Tests", "Sharp.BlobStorage.Tests\Sharp.BlobStorage.Tests.csproj", "{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{D270238E-7159-4119-8C72-70121F8C0073}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D270238E-7159-4119-8C72-70121F8C0073}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D270238E-7159-4119-8C72-70121F8C0073}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
