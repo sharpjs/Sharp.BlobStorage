@@ -1,0 +1,10 @@
+﻿<Project>
+
+  <!-- This file will be overwritten by the build server. -->
+
+  <PropertyGroup>
+    <Version>0.0.0-local</Version>
+    <FileVersion>0.0.0.0</FileVersion>
+  </PropertyGroup>
+
+</Project>
