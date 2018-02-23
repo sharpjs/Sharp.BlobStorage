@@ -1,0 +1,34 @@
+# Build Products
+obj/
+bin/
+/build/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.cache
+
+# NuGet
+/packages/
+
+# Testing
+TestResults
+TestResult*.xml
+
+# Temporary Files
+*.log
+*.old
+*.tmp
+
+# Git
+*.orig
+*.patch
+*.rej
+
+# Windows Junk
+Thumbs.db
+Desktop.ini
+
+# OS X Junk
+.DS_Store
