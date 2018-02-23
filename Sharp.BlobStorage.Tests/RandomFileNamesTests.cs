@@ -14,7 +14,10 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
@@ -29,9 +32,49 @@ namespace Sharp.BlobStorage.Tests
         {
             var names = new ConcurrentBag<string>();
 
-            var x = Parallel.For(0, 100, _ => RandomFileNames.Next());
+            Parallel.For(0, 100, _ => names.Add(RandomFileNames.Next()));
 
-            names.Should().OnlyHaveUniqueItems();
+            names.Should().HaveCount(100).And.OnlyHaveUniqueItems();
+        }
+
+        [Test]
+        public void Next_Separator()
+        {
+            var names = new ConcurrentBag<string>();
+
+            Parallel.For(0, 100, _ => names.Add(RandomFileNames.Next(separator: '!')));
+
+            names.Should().HaveCount(100).And.OnlyHaveUniqueItems();
+
+            NamesShouldHaveCharAtSameIndexes(names, '!');
+        }
+
+        [Test]
+        public void Next_Suffix()
+        {
+            var names = new ConcurrentBag<string>();
+
+            Parallel.For(0, 100, _ => names.Add(RandomFileNames.Next(suffix: "SUFFIX")));
+
+            names.Should().HaveCount(100).And.OnlyHaveUniqueItems();
+
+            names.Should().OnlyContain(n => n.EndsWith("SUFFIX", StringComparison.Ordinal));
+        }
+
+        private void NamesShouldHaveCharAtSameIndexes(IEnumerable<string> names, char separator)
+        {
+            for (var start = 0;;)
+            {
+                var index = names.First().IndexOf(separator, start);
+
+                names.Should().OnlyContain(
+                    predicate: n => n.IndexOf(separator, start) == index,
+                    because: "Separators should appear at the same indexes in every generated name."
+                );
+
+                if (index < 0) break;
+                start = index + 1;
+            }
         }
     }
 }
