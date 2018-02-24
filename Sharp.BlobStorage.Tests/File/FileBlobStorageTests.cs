@@ -86,7 +86,7 @@ namespace Sharp.BlobStorage.File
         [Test]
         public void Construct_InvalidConfigurationPath()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws(Is.AssignableTo<Exception>(), () =>
             {
                 new FileBlobStorage(new FileBlobStorageConfiguration
                 {
