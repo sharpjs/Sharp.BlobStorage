@@ -229,5 +229,18 @@ namespace Sharp.BlobStorage.File
                 await storage.GetAsync(uri);
             });
         }
+
+        [Test]
+        public void GetAsync_NotFound()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var path    = Path.Combine(Configuration.Path, @"does\not\exist.txt");
+            var uri     = new Uri(path);
+
+            Assert.ThrowsAsync(Is.AssignableTo<IOException>(), async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
     }
 }
