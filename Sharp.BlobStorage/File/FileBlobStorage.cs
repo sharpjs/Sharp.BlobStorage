@@ -122,6 +122,6 @@ namespace Sharp.BlobStorage.File
             );
 
         private static string GenerateFileName(string extension)
-            => RandomFileNames.Next(separator: '\\');
+            => RandomFileNames.Next(separator: '\\', extension);
     }
 }
