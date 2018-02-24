@@ -65,7 +65,7 @@ namespace Sharp.BlobStorage.File
         {
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));
-            if (!uri.IsFile)
+            if (!uri.IsAbsoluteUri || !uri.IsFile)
                 throw new ArgumentOutOfRangeException(nameof(uri));
 
             var relative = _baseUri.MakeRelativeUri(uri);
