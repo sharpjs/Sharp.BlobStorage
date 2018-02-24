@@ -94,6 +94,9 @@ else {
     throw "Version.props <Version> content is not a SemVer 2.0 version."
 }
 
+# File version components are 16-bit numbers; just wrap counter to 17 bits
+$Counter = $Counter -band 0xFFFF
+
 # Merge branch and build counter
 if ($Branch -match $VersionRegex) {
     # Branch name contains a usable version string (ex: a release scenario)
