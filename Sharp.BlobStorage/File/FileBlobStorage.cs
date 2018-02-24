@@ -80,6 +80,11 @@ namespace Sharp.BlobStorage.File
         /// <inheritdoc />
         public override async Task<Uri> PutAsync(Stream stream, string extension = null)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead)
+                throw new ArgumentOutOfRangeException(nameof(stream));
+
             // Compute paths
             var realPath   = Path.Combine(_basePath, GenerateFileName(extension));
             var tempPath   = Path.ChangeExtension(realPath, ".upl");
