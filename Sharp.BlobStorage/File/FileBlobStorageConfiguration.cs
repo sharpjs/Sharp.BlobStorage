@@ -19,11 +19,21 @@ namespace Sharp.BlobStorage.File
     /// <summary>
     ///   Configuration required by <see cref="FileBlobStorage"/>.
     /// </summary>
-    public interface IFileBlobStorageConfiguration
+    public class FileBlobStorageConfiguration
     {
         /// <summary>
-        ///   Path to a directory where blobs are stored as files.
+        ///   Path to a directory in which to store blobs as files.
         /// </summary>
-        string Path { get; }
+        public string Path { get; set; }
+
+        /// <summary>
+        ///   Size of buffer to use for file reads, in bytes.  The default is 64 KB.
+        /// </summary>
+        public int? ReadBufferSize { get; set; }
+
+        /// <summary>
+        ///   Size of buffer to use for file writes, in bytes.  The default is 64 KB.
+        /// </summary>
+        public int? WriteBufferSize { get; set; }
     }
 }
