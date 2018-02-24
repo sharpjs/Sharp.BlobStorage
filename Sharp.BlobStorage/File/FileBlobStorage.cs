@@ -57,6 +57,9 @@ namespace Sharp.BlobStorage.File
             _basePath        = Directory.CreateDirectory(configuration.Path).FullName;
             _baseUri         = new Uri(_basePath);
 
+            if (_basePath[_basePath.Length - 1] != Path.DirectorySeparatorChar)
+                _basePath += Path.DirectorySeparatorChar;
+
             //Log.Information("Using file-based blob storage at '{0}'.", _basePath);
         }
 
@@ -67,9 +70,8 @@ namespace Sharp.BlobStorage.File
                 throw new ArgumentNullException(nameof(uri));
             if (!uri.IsAbsoluteUri || !uri.IsFile)
                 throw new ArgumentOutOfRangeException(nameof(uri));
-
-            var relative = _baseUri.MakeRelativeUri(uri);
-            if (relative.IsAbsoluteUri)
+            if (!uri.LocalPath.StartsWith(_basePath, StringComparison.OrdinalIgnoreCase))
+                // uri is not relative to _baseUri
                 throw new ArgumentOutOfRangeException(nameof(uri));
 
             return Task.FromResult(OpenFileForRead(uri.LocalPath));
