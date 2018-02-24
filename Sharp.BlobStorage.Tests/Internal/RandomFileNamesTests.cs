@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace Sharp.BlobStorage.Tests
+namespace Sharp.BlobStorage.Internal
 {
     [TestFixture]
     public class RandomFileNamesTests

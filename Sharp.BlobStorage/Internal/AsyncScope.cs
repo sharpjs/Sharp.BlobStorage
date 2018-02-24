@@ -17,7 +17,7 @@
 using System;
 using System.Threading;
 
-namespace Sharp.BlobStorage
+namespace Sharp.BlobStorage.Internal
 {
     /// <summary>
     ///   A scope that enables synchronous code to invoke <c>Task</c>-based

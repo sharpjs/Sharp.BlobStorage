@@ -17,6 +17,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Sharp.BlobStorage.Internal;
 
 namespace Sharp.BlobStorage
 {

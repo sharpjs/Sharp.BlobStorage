@@ -17,7 +17,7 @@
 using System;
 using System.Globalization;
 
-namespace Sharp.BlobStorage
+namespace Sharp.BlobStorage.Internal
 {
     internal static class RandomFileNames
     {
