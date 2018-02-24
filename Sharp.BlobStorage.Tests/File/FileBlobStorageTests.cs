@@ -19,6 +19,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Moq;
 using NUnit.Framework;
 using static System.IO.File;
 
@@ -53,7 +54,75 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public async Task Put()
+        public void Construct_NullConfiguration()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new FileBlobStorage(null);
+            });
+        }
+
+        [Test]
+        public void Construct_NullConfigurationPath()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new FileBlobStorage(new FileBlobStorageConfiguration());
+            });
+        }
+
+        [Test]
+        public void Construct_EmptyConfigurationPath()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                new FileBlobStorage(new FileBlobStorageConfiguration
+                {
+                    Path = string.Empty
+                });
+            });
+        }
+
+        [Test]
+        public void Construct_InvalidConfigurationPath()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new FileBlobStorage(new FileBlobStorageConfiguration
+                {
+                    Path = "<!-- not a valid path -->"
+                });
+            });
+        }
+
+        [Test]
+        public void Construct_ConfigurationReadBufferSizeOutOfRange()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                new FileBlobStorage(new FileBlobStorageConfiguration
+                {
+                    Path           = Configuration.Path,
+                    ReadBufferSize = -1,
+                });
+            });
+        }
+
+        [Test]
+        public void Construct_ConfigurationWriteBufferSizeOutOfRange()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                new FileBlobStorage(new FileBlobStorageConfiguration
+                {
+                    Path            = Configuration.Path,
+                    WriteBufferSize = -1,
+                });
+            });
+        }
+
+        [Test]
+        public async Task PutAsync()
         {
             var storage = new FileBlobStorage(Configuration);
             var bytes   = Utf8.GetBytes(TestText);
@@ -71,7 +140,30 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public async Task Get()
+        public void PutAsync_NullStream()
+        {
+            var storage = new FileBlobStorage(Configuration);
+
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await storage.PutAsync(null, ".dat");
+            });
+        }
+
+        [Test]
+        public void PutAsync_UnreadableStream()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var stream  = Mock.Of<Stream>(s => s.CanRead == false);
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.PutAsync(stream, ".dat");
+            });
+        }
+
+        [Test]
+        public async Task GetAsync()
         {
             var storage = new FileBlobStorage(Configuration);
             var path    = Path.Combine(Configuration.Path, "TestBlob.txt");
@@ -89,6 +181,53 @@ namespace Sharp.BlobStorage.File
             }
 
             Utf8.GetString(bytes).Should().Be(TestText);
+        }
+
+        [Test]
+        public void GetAsync_NullUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await storage.GetAsync(null);
+            });
+        }
+
+        [Test]
+        public void GetAsync_NonFileUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri("https://example.com");
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public void GetAsync_RelativeUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri("File.txt", UriKind.Relative);
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public void GetAsync_NotMyUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(@"Z:\Some\Other\Path.txt");
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
         }
     }
 }
