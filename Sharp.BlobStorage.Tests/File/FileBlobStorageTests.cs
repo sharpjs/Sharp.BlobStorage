@@ -231,6 +231,21 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
+        public void GetAsync_MaliciousUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(
+                new Uri(Configuration.Path),
+                new Uri(@"..\..\..\..\Sharp.BlobStorage.sln", UriKind.Relative)
+            );
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
         public void GetAsync_NotFound()
         {
             var storage = new FileBlobStorage(Configuration);
