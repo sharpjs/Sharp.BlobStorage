@@ -15,10 +15,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Sharp.BlobStorage.Azure
@@ -36,14 +32,50 @@ namespace Sharp.BlobStorage.Azure
             Configuration = new AzureBlobStorageConfiguration
             {
                 ConnectionString = "UseDevelopmentStorage=true",
-                ContainerName    = "AzureBlobStorageTests",
+                ContainerName    = "blob-storage-tests",
             };
         }
 
         [Test]
-        public void ATest()
+        public void Construct_NullConfiguration()
         {
-            System.Threading.Thread.Sleep(10 * 1000);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new AzureBlobStorage(null);
+            });
+        }
+
+        [Test]
+        public void Construct_NullConfigurationConnectionString()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                var configuration = Configuration.Clone();
+                configuration.ConnectionString = null;
+                new AzureBlobStorage(configuration);
+            });
+        }
+
+        [Test]
+        public void Construct_NullConfigurationContainerName()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                var configuration = Configuration.Clone();
+                configuration.ContainerName = null;
+                new AzureBlobStorage(configuration);
+            });
+        }
+
+        [Test]
+        public void GetAsync_NullUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await storage.GetAsync(null);
+            });
         }
     }
 }
