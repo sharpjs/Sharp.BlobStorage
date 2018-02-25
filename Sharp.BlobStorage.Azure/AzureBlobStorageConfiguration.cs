@@ -30,5 +30,8 @@ namespace Sharp.BlobStorage.Azure
         ///   Name of the blob container.
         /// </summary>
         public string ContainerName { get; set; }
+
+        internal AzureBlobStorageConfiguration Clone()
+            => (AzureBlobStorageConfiguration) MemberwiseClone();
     }
 }
