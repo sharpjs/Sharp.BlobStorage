@@ -15,6 +15,12 @@
 */
 
 using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using FluentAssertions;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using NUnit.Framework;
 
 namespace Sharp.BlobStorage.Azure
@@ -24,7 +30,15 @@ namespace Sharp.BlobStorage.Azure
     {
         const string TestText = "Testing, testing, one two three.";
 
+        private static readonly Encoding Utf8 = new UTF8Encoding(
+            encoderShouldEmitUTF8Identifier: false, // no BOM
+            throwOnInvalidBytes:             true
+        );
+
         private AzureBlobStorageConfiguration Configuration;
+        private CloudStorageAccount           Account;
+        private CloudBlobClient               Client;
+        private CloudBlobContainer            Container;
 
         [SetUp]
         public void SetUp()
@@ -34,6 +48,11 @@ namespace Sharp.BlobStorage.Azure
                 ConnectionString = "UseDevelopmentStorage=true",
                 ContainerName    = "blob-storage-tests",
             };
+
+            Account   = CloudStorageAccount.Parse(Configuration.ConnectionString);
+            Client    = Account.CreateCloudBlobClient();
+            Container = Client.GetContainerReference(Configuration.ContainerName);
+            Container.CreateIfNotExists();
         }
 
         [Test]
@@ -68,6 +87,26 @@ namespace Sharp.BlobStorage.Azure
         }
 
         [Test]
+        public async Task GetAsync()
+        {
+            var blob = Container.GetBlockBlobReference("test/file.txt");
+            await blob.UploadTextAsync(TestText, Utf8, AccessCondition.GenerateEmptyCondition(), null, null);
+            var uri = blob.Uri;
+
+            var storage = new AzureBlobStorage(Configuration);
+
+            byte[] bytes;
+            using (var stream = await storage.GetAsync(uri))
+            using (var memory = new MemoryStream())
+            {
+                await stream.CopyToAsync(memory);
+                bytes = memory.ToArray();
+            }
+
+            Utf8.GetString(bytes).Should().Be(TestText);
+        }
+
+        [Test]
         public void GetAsync_NullUri()
         {
             var storage = new AzureBlobStorage(Configuration);
@@ -75,6 +114,54 @@ namespace Sharp.BlobStorage.Azure
             Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 await storage.GetAsync(null);
+            });
+        }
+
+        [Test]
+        public void GetAsync_RelativeUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri("relative/file.txt", UriKind.Relative);
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public void GetAsync_NotMyUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri("https://example.com/not/my/uri");
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public void GetAsync_MaliciousUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri(Container.Uri, "../other-container/file.txt");
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public void GetAsync_NotFound()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri(Container.Uri, "does/not/exist.txt");
+
+            Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), async () =>
+            {
+                await storage.GetAsync(uri);
             });
         }
     }
