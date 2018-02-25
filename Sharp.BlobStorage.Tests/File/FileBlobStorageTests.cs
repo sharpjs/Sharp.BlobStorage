@@ -122,47 +122,6 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public async Task PutAsync()
-        {
-            var storage = new FileBlobStorage(Configuration);
-            var bytes   = Utf8.GetBytes(TestText);
-
-            Uri uri;
-            using (var stream = new MemoryStream(bytes))
-                uri = await storage.PutAsync(stream, ".txt");
-
-            uri           .Should().NotBeNull();
-            uri.IsFile    .Should().BeTrue();
-            uri.LocalPath .Should().StartWith(Configuration.Path + @"\");
-            uri.LocalPath .Should().EndWith(".txt");
-
-            ReadAllText(uri.LocalPath, Utf8).Should().Be(TestText);
-        }
-
-        [Test]
-        public void PutAsync_NullStream()
-        {
-            var storage = new FileBlobStorage(Configuration);
-
-            Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                await storage.PutAsync(null, ".dat");
-            });
-        }
-
-        [Test]
-        public void PutAsync_UnreadableStream()
-        {
-            var storage = new FileBlobStorage(Configuration);
-            var stream  = Mock.Of<Stream>(s => s.CanRead == false);
-
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
-            {
-                await storage.PutAsync(stream, ".dat");
-            });
-        }
-
-        [Test]
         public async Task GetAsync()
         {
             var storage = new FileBlobStorage(Configuration);
@@ -255,6 +214,47 @@ namespace Sharp.BlobStorage.File
             Assert.ThrowsAsync(Is.AssignableTo<IOException>(), async () =>
             {
                 await storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public async Task PutAsync()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var bytes   = Utf8.GetBytes(TestText);
+
+            Uri uri;
+            using (var stream = new MemoryStream(bytes))
+                uri = await storage.PutAsync(stream, ".txt");
+
+            uri           .Should().NotBeNull();
+            uri.IsFile    .Should().BeTrue();
+            uri.LocalPath .Should().StartWith(Configuration.Path + @"\");
+            uri.LocalPath .Should().EndWith(".txt");
+
+            ReadAllText(uri.LocalPath, Utf8).Should().Be(TestText);
+        }
+
+        [Test]
+        public void PutAsync_NullStream()
+        {
+            var storage = new FileBlobStorage(Configuration);
+
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await storage.PutAsync(null, ".dat");
+            });
+        }
+
+        [Test]
+        public void PutAsync_UnreadableStream()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var stream  = Mock.Of<Stream>(s => s.CanRead == false);
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            {
+                await storage.PutAsync(stream, ".dat");
             });
         }
     }
