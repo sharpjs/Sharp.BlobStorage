@@ -16,11 +16,14 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Sharp.BlobStorage.Internal;
+
+[assembly: InternalsVisibleTo("Sharp.BlobStorage.Azure.Tests")]
 
 namespace Sharp.BlobStorage.Azure
 {
