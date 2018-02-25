@@ -24,11 +24,11 @@ namespace Sharp.BlobStorage.Azure
         /// <summary>
         ///   Azure storage connection string.
         /// </summary>
-        public string ConnectionString { get; internal set; }
+        public string ConnectionString { get; set; }
 
         /// <summary>
         ///   Name of the blob container.
         /// </summary>
-        public string ContainerName { get; internal set; }
+        public string ContainerName { get; set; }
     }
 }
