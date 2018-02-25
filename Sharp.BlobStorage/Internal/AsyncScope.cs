@@ -35,7 +35,7 @@ namespace Sharp.BlobStorage.Internal
     ///     deadlock.
     ///   </para>
     /// </remarks>
-    internal sealed class AsyncScope : IDisposable
+    public sealed class AsyncScope : IDisposable
     {
         private readonly SynchronizationContext _context;
 

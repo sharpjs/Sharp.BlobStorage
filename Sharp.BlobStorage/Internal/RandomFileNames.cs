@@ -19,12 +19,21 @@ using System.Globalization;
 
 namespace Sharp.BlobStorage.Internal
 {
-    internal static class RandomFileNames
+    /// <summary>
+    ///   Random file name generator.
+    /// </summary>
+    public static class RandomFileNames
     {
         private static readonly Random
             Random = CreateRandom();
 
-        internal static string Next(char separator = '.', string suffix = null)
+        /// <summary>
+        ///   Generates the next random filename.
+        /// </summary>
+        /// <param name="separator">A character to separate parts of the file name.</param>
+        /// <param name="suffix">An optional suffix to append to the file name.</param>
+        /// <returns>A random filename.</returns>
+        public static string Next(char separator = '.', string suffix = null)
         {
             // Format: yyyy/MMdd/yyyyMMdd_HHmmss_xxxxxxxx.ext
 
