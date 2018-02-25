@@ -14,10 +14,6 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Sharp.BlobStorage.Azure
 {
     /// <summary>
@@ -25,5 +21,14 @@ namespace Sharp.BlobStorage.Azure
     /// </summary>
     public class AzureBlobStorageConfiguration
     {
+        /// <summary>
+        ///   Azure storage connection string.
+        /// </summary>
+        public string ConnectionString { get; internal set; }
+
+        /// <summary>
+        ///   Name of the blob container.
+        /// </summary>
+        public string ContainerName { get; internal set; }
     }
 }
