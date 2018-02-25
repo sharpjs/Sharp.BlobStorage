@@ -10,6 +10,7 @@ bin/
 *.cache
 
 # NuGet
+/.nuget/
 /packages/
 
 # Testing
