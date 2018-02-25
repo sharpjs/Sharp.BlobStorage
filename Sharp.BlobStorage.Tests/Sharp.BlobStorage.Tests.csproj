@@ -3,15 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>net471</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <RootNamespace>Sharp.BlobStorage</RootNamespace>
+    <Description>Test suite for Sharp.BlobStorage</Description>
   </PropertyGroup>
 
   <Import Project="..\General.props" />
   <Import Project="..\Version.props" />
-
-  <PropertyGroup>
-    <Description>Test suite for Sharp.BlobStorage</Description>
-    <RootNamespace>Sharp.BlobStorage</RootNamespace>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.1.2" />
