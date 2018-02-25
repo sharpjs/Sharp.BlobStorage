@@ -46,6 +46,10 @@ namespace Sharp.BlobStorage.Azure
         {
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
+            if (configuration.ConnectionString == null)
+                throw new ArgumentNullException("configuration.ConnectionString");
+            if (configuration.ContainerName == null)
+                throw new ArgumentNullException("configuration.ContainerName");
 
             _account = CloudStorageAccount.Parse(configuration.ConnectionString);
 
