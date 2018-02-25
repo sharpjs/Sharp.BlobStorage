@@ -26,7 +26,7 @@
   <Import Project="..\Version.props" />
 
   <ItemGroup>
-    <PackageReference Include="Sharp.BlobStorage" Version="0.0.0-alpha1" />
+    <PackageReference Include="Sharp.BlobStorage" Version="0.0.0-alpha2" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.0.0" />
   </ItemGroup>
 
