@@ -14,10 +14,10 @@
     <PackageReference Include="FluentAssertions" Version="5.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="Sharp.BlobStorage" Version="0.0.0-alpha2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sharp.BlobStorage\Sharp.BlobStorage.csproj" />
     <ProjectReference Include="..\Sharp.BlobStorage.Azure\Sharp.BlobStorage.Azure.csproj" />
   </ItemGroup>
 
