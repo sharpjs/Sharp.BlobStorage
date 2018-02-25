@@ -16,7 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C6C045F4
 		Version.props = Version.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BlobStorage.Tests", "Sharp.BlobStorage.Tests\Sharp.BlobStorage.Tests.csproj", "{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage.Tests", "Sharp.BlobStorage.Tests\Sharp.BlobStorage.Tests.csproj", "{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BlobStorage.Azure", "Sharp.BlobStorage.Azure\Sharp.BlobStorage.Azure.csproj", "{387F9FD8-80A6-477A-87D9-EC3035AF197B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{387F9FD8-80A6-477A-87D9-EC3035AF197B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{387F9FD8-80A6-477A-87D9-EC3035AF197B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{387F9FD8-80A6-477A-87D9-EC3035AF197B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{387F9FD8-80A6-477A-87D9-EC3035AF197B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
