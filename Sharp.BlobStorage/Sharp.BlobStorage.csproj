@@ -19,6 +19,7 @@
     <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <Description>A very simple .NET interface to blob storage.</Description>
   </PropertyGroup>
 
   <Import Project="..\General.props" />
