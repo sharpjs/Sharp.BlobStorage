@@ -9,6 +9,7 @@
     * In Version.props, intended to set assembly and nupkg versions
     * As console output, intended to set the TeamCity build number
 
+.NOTES
     Copyright (C) 2018 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
