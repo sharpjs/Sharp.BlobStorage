@@ -114,11 +114,11 @@ if ($Branch -match $VersionRegex) {
 }
 elseif ($Branch -match $PullRequestRegex) {
     # Branch name contains a pull request number
-    $VersionFull = "{0}-pr.{1}.{2}" -f $Version, $Matches.Number, $Counter
+    $VersionFull = "{0}-pr{1}-b{2}" -f $Version, $Matches.Number, $Counter
 }
 else {
     # Branch name not recognized
-    $VersionFull = "{0}-{1}.{2}" -f $Version, $Branch, $Counter
+    $VersionFull = "{0}-{1}-b{2}" -f $Version, $Branch, $Counter
 }
 
 # Apply version number to code.
