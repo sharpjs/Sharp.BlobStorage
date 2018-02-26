@@ -147,9 +147,9 @@ namespace Sharp.BlobStorage.File
         {
             var storage = new FileBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            Assert.ThrowsAsync<ArgumentNullException>(() =>
             {
-                await storage.GetAsync(null);
+                return storage.GetAsync(null);
             });
         }
 
@@ -159,9 +159,9 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri("https://example.com");
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -171,9 +171,9 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri("File.txt", UriKind.Relative);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -183,9 +183,9 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri(@"Z:\Some\Other\Path.txt");
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -198,9 +198,9 @@ namespace Sharp.BlobStorage.File
                 new Uri(@"..\..\..\..\Sharp.BlobStorage.sln", UriKind.Relative)
             );
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -211,9 +211,9 @@ namespace Sharp.BlobStorage.File
             var path    = Path.Combine(Configuration.Path, @"does\not\exist.txt");
             var uri     = new Uri(path);
 
-            Assert.ThrowsAsync(Is.AssignableTo<IOException>(), async () =>
+            Assert.ThrowsAsync(Is.AssignableTo<IOException>(), () =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -240,9 +240,9 @@ namespace Sharp.BlobStorage.File
         {
             var storage = new FileBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            Assert.ThrowsAsync<ArgumentNullException>(() =>
             {
-                await storage.PutAsync(null, ".dat");
+                return storage.PutAsync(null, ".dat");
             });
         }
 
@@ -252,9 +252,9 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var stream  = Mock.Of<Stream>(s => s.CanRead == false);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             {
-                await storage.PutAsync(stream, ".dat");
+                return storage.PutAsync(stream, ".dat");
             });
         }
     }

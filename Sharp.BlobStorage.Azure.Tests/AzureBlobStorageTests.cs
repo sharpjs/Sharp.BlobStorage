@@ -111,9 +111,9 @@ namespace Sharp.BlobStorage.Azure
         {
             var storage = new AzureBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            Assert.ThrowsAsync<ArgumentNullException>(() =>
             {
-                await storage.GetAsync(null);
+                return storage.GetAsync(null);
             });
         }
 
@@ -123,9 +123,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri("relative/file.txt", UriKind.Relative);
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -135,9 +135,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri("https://example.com/not/my/uri");
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -147,9 +147,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri(Container.Uri, "../other-container/file.txt");
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
 
@@ -159,9 +159,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri(Container.Uri, "does/not/exist.txt");
 
-            Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), async () =>
+            Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), () =>
             {
-                await storage.GetAsync(uri);
+                return storage.GetAsync(uri);
             });
         }
     }
