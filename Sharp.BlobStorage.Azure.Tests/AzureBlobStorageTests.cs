@@ -52,7 +52,9 @@ namespace Sharp.BlobStorage.Azure
             Account   = CloudStorageAccount.Parse(Configuration.ConnectionString);
             Client    = Account.CreateCloudBlobClient();
             Container = Client.GetContainerReference(Configuration.ContainerName);
-            Container.CreateIfNotExists();
+
+            Container.DeleteIfExists();
+            Container.Create();
         }
 
         [Test]
