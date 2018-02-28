@@ -92,7 +92,7 @@ namespace Sharp.BlobStorage.Azure
         public async Task GetAsync()
         {
             var blob = Container.GetBlockBlobReference("test/file.txt");
-            await blob.UploadTextAsync(TestText, Utf8, AccessCondition.GenerateEmptyCondition(), null, null);
+            await blob.UploadTextAsync(TestText, Utf8, null, null, null);
             var uri = blob.Uri;
 
             var storage = new AzureBlobStorage(Configuration);
