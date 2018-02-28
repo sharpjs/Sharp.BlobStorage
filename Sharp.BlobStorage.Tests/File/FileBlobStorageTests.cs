@@ -26,6 +26,7 @@ using static System.IO.File;
 namespace Sharp.BlobStorage.File
 {
     [TestFixture]
+    [SingleThreaded] // Becuase PutAsync_FileSystemChanged needs to damage the repository.
     public class FileBlobStorageTests
     {
         const string TestText = "Testing, testing, one two three.";
@@ -256,6 +257,29 @@ namespace Sharp.BlobStorage.File
             {
                 return storage.PutAsync(stream, ".dat");
             });
+        }
+
+        [Test]
+        public void PutAsync_FileSystemChanged()
+        {
+            try
+            {
+                var storage = new FileBlobStorage(Configuration);
+                var bytes   = Utf8.GetBytes(TestText);
+
+                Directory.Delete(Configuration.Path, recursive: true);
+                WriteAllText(Configuration.Path, "same name as desired directory");
+
+                using (var stream = new MemoryStream(bytes))
+                    Assert.ThrowsAsync(
+                        Is.AssignableTo<IOException>().And.Message.Contains("with the same name already exists"),
+                        () => storage.PutAsync(stream, ".txt")
+                    );
+            }
+            finally
+            {
+                Delete(Configuration.Path);
+            }
         }
     }
 }
