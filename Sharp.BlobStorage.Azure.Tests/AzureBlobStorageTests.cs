@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Moq;
 using NUnit.Framework;
 
 namespace Sharp.BlobStorage.Azure
@@ -164,6 +165,48 @@ namespace Sharp.BlobStorage.Azure
             Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), () =>
             {
                 return storage.GetAsync(uri);
+            });
+        }
+
+        [Test]
+        public async Task PutAsync()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var bytes   = Utf8.GetBytes(TestText);
+
+            Uri uri;
+            using (var stream = new MemoryStream(bytes))
+                uri = await storage.PutAsync(stream, ".txt");
+
+            uri              .Should().NotBeNull();
+            uri              .Should().Match<Uri>(u => Container.Uri.IsBaseOf(u));
+            uri.AbsolutePath .Should().EndWith(".txt");
+
+            var blob = new CloudBlockBlob(uri, Account.Credentials);
+            var text = await blob.DownloadTextAsync(Utf8, null, null, null);
+            text.Should().Be(TestText);
+        }
+
+        [Test]
+        public void PutAsync_NullStream()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+
+            Assert.ThrowsAsync<ArgumentNullException>(() =>
+            {
+                return storage.PutAsync(null, ".dat");
+            });
+        }
+
+        [Test]
+        public void PutAsync_UnreadableStream()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var stream  = Mock.Of<Stream>(s => s.CanRead == false);
+
+            Assert.ThrowsAsync<ArgumentException>(() =>
+            {
+                return storage.PutAsync(stream, ".dat");
             });
         }
     }
