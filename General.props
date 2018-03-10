@@ -32,6 +32,8 @@ https://github.com/sharpjs/Sharp.BlobStorage/releases
   <PropertyGroup>
     <LangVersion>7.2</LangVersion>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <RestorePackagesPath>..\packages</RestorePackagesPath>
+    <PackageOutputPath>..\dist\</PackageOutputPath>
   </PropertyGroup>
 
 </Project>
