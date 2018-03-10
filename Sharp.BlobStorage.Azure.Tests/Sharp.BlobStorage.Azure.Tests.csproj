@@ -16,15 +16,15 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   -->
 
+  <Import Project="..\General.props" />
+  <Import Project="..\Local.props" Condition="Exists('..\Local.props')" />
+
   <PropertyGroup>
     <TargetFrameworks>net471</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>Sharp.BlobStorage.Azure</RootNamespace>
     <Description>Test suite for Sharp.BlobStorage.Azure</Description>
   </PropertyGroup>
-
-  <Import Project="..\General.props" />
-  <Import Project="..\Version.props" />
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.1.2" />
