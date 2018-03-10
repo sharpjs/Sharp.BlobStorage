@@ -22,6 +22,7 @@
   <PropertyGroup>
     <Description>Azure support for Sharp.BlobStorage, a very simple .NET interface to blob storage.</Description>
     <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
