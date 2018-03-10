@@ -18,6 +18,7 @@
 
   <PropertyGroup>
     <Product>Sharp.BlobStorage</Product>
+    <Version>0.0.0-local</Version>
     <Authors>Jeffrey Sharp</Authors>
     <Company>Jeffrey Sharp</Company>
     <Copyright>Copyright 2018 Jeffrey Sharp</Copyright>
