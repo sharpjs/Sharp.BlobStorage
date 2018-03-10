@@ -36,4 +36,6 @@ https://github.com/sharpjs/Sharp.BlobStorage/releases
     <PackageOutputPath>..\dist\</PackageOutputPath>
   </PropertyGroup>
 
+  <Target Name="RestoreAgain" DependsOnTargets="Restore" BeforeTargets="BeforeBuild" />
+
 </Project>
