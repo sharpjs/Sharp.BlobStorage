@@ -18,9 +18,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C6C045F4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage.Tests", "Sharp.BlobStorage.Tests\Sharp.BlobStorage.Tests.csproj", "{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BlobStorage.Azure", "Sharp.BlobStorage.Azure\Sharp.BlobStorage.Azure.csproj", "{387F9FD8-80A6-477A-87D9-EC3035AF197B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage.Azure", "Sharp.BlobStorage.Azure\Sharp.BlobStorage.Azure.csproj", "{387F9FD8-80A6-477A-87D9-EC3035AF197B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D270238E-7159-4119-8C72-70121F8C0073} = {D270238E-7159-4119-8C72-70121F8C0073}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BlobStorage.Azure.Tests", "Sharp.BlobStorage.Azure.Tests\Sharp.BlobStorage.Azure.Tests.csproj", "{96D73AF7-B92D-4146-BB62-79880E918C7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage.Azure.Tests", "Sharp.BlobStorage.Azure.Tests\Sharp.BlobStorage.Azure.Tests.csproj", "{96D73AF7-B92D-4146-BB62-79880E918C7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
