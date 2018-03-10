@@ -20,10 +20,8 @@
   <Import Project="..\Local.props" Condition="Exists('..\Local.props')" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Description>A very simple .NET interface to blob storage.</Description>
+    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
   </PropertyGroup>
 
 </Project>

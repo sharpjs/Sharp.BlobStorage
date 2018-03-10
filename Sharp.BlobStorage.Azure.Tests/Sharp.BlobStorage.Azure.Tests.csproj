@@ -20,10 +20,10 @@
   <Import Project="..\Local.props" Condition="Exists('..\Local.props')" />
 
   <PropertyGroup>
-    <TargetFrameworks>net471</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <RootNamespace>Sharp.BlobStorage.Azure</RootNamespace>
     <Description>Test suite for Sharp.BlobStorage.Azure</Description>
+    <TargetFrameworks>net471</TargetFrameworks>
+    <RootNamespace>Sharp.BlobStorage.Azure</RootNamespace>
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

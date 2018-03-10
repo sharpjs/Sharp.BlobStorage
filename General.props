@@ -29,4 +29,9 @@ https://github.com/sharpjs/Sharp.BlobStorage/releases
 </PackageReleaseNotes>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <LangVersion>7.2</LangVersion>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
 </Project>
