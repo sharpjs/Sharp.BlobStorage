@@ -36,6 +36,11 @@ https://github.com/sharpjs/Sharp.BlobStorage/releases
     <PackageOutputPath>..\dist\</PackageOutputPath>
   </PropertyGroup>
 
-  <Target Name="RestoreAgain" DependsOnTargets="Restore" BeforeTargets="BeforeBuild" />
+  <!--
+    Projects depend on NuGet packages produced by other projects.  Before
+    building each project, we must (re-)trigger package restore so that newly
+    built packages will be found.
+  -->
+  <Target Name="PerProjectRestore" DependsOnTargets="Restore" BeforeTargets="BeforeBuild" />
 
 </Project>
