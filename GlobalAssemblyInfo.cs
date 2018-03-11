@@ -1,6 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <!--
+﻿/*
     Copyright (C) 2018 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
@@ -14,19 +12,20 @@
     WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-  -->
+*/
 
-  <Import Project="..\General.props" />
-  <Import Project="..\Local.props" Condition="Exists('..\Local.props')" />
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security;
 
-  <PropertyGroup>
-    <Description>A very simple .NET interface to blob storage.</Description>
-    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+// COM Compliance
+[assembly: ComVisible(false)]
 
-  <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
-  </ItemGroup>
+// Security
+[assembly: SecurityRules(SecurityRuleSet.Level2)]
 
-</Project>
+// Visibility
+[assembly: InternalsVisibleTo("RSMassTransit.Client.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+                            // ^^^^^^^^^^^^^^^^^^^^^^^^
+                            // Required for Moq to mock a class with an internal abstract method.
