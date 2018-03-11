@@ -16,13 +16,18 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+#if NETFX
 using System.Security;
+#endif
 
 // COM Compliance
 [assembly: ComVisible(false)]
 
+#if NETFX
 // Security
 [assembly: SecurityRules(SecurityRuleSet.Level2)]
+#endif
 
 // Visibility
 [assembly: InternalsVisibleTo("RSMassTransit.Client.Tests")]
