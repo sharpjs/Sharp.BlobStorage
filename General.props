@@ -36,6 +36,14 @@ https://github.com/sharpjs/Sharp.BlobStorage/releases
     <PackageOutputPath>..\dist\</PackageOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard'))">
+    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
+  </PropertyGroup>
+
   <!--
     Projects depend on NuGet packages produced by other projects.  Before
     building each project, we must (re-)trigger package restore so that newly
