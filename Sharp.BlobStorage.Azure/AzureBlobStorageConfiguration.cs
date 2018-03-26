@@ -19,7 +19,7 @@ namespace Sharp.BlobStorage.Azure
     /// <summary>
     ///   Configuration required by <see cref="AzureBlobStorage"/>.
     /// </summary>
-    public class AzureBlobStorageConfiguration
+    public class AzureBlobStorageConfiguration : BlobStorageConfiguration
     {
         /// <summary>
         ///   Azure storage connection string.

@@ -14,26 +14,20 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-namespace Sharp.BlobStorage.File
+using System;
+
+namespace Sharp.BlobStorage
 {
     /// <summary>
-    ///   Configuration required by <see cref="FileBlobStorage"/>.
+    ///   Base class for blob storage provider configuration.
     /// </summary>
-    public class FileBlobStorageConfiguration : BlobStorageConfiguration
+    public abstract class BlobStorageConfiguration
     {
         /// <summary>
-        ///   Path to a directory in which to store blobs as files.
+        ///   Base URI for generated blob URIs.  The default is
+        ///   <c>"blob:///"</c>, which indicates the <c>blob</c> scheme, an
+        ///   empty hostname, and the root path.
         /// </summary>
-        public string Path { get; set; }
-
-        /// <summary>
-        ///   Size of buffer to use for file reads, in bytes.  The default is 64 KB.
-        /// </summary>
-        public int? ReadBufferSize { get; set; }
-
-        /// <summary>
-        ///   Size of buffer to use for file writes, in bytes.  The default is 64 KB.
-        /// </summary>
-        public int? WriteBufferSize { get; set; }
+        public Uri BaseUri { get; set; }
     }
 }
