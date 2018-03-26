@@ -91,7 +91,7 @@ namespace Sharp.BlobStorage.File
             {
                 new FileBlobStorage(new FileBlobStorageConfiguration
                 {
-                    Path = "<!-- not a valid path -->"
+                    Path = "<*> not a valid path <*>"
                 });
             });
         }
