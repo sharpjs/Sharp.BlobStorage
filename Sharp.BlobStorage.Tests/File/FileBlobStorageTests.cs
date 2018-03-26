@@ -200,9 +200,9 @@ namespace Sharp.BlobStorage.File
             using (var stream = new MemoryStream(bytes))
                 uri = await storage.PutAsync(stream, ".txt");
 
-            uri                           .Should().NotBeNull();
-            uri.LocalPath                 .Should().EndWith(".txt");
-            storage.BaseUri.IsBaseOf(uri) .Should().BeTrue();
+            uri              .Should().NotBeNull();
+            uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
+            uri.AbsolutePath .Should().EndWith(".txt");
 
             var realBaseUri = new Uri(Configuration.Path).EnsurePathTrailingSlash();
             var path        = uri.ChangeBase(storage.BaseUri, realBaseUri).LocalPath;
