@@ -75,7 +75,7 @@ namespace Sharp.BlobStorage.File
         [Test]
         public void Construct_EmptyConfigurationPath()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 new FileBlobStorage(new FileBlobStorageConfiguration
                 {

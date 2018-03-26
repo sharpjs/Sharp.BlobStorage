@@ -54,7 +54,7 @@ namespace Sharp.BlobStorage.File
             if (configuration.Path == null)
                 throw new ArgumentNullException("configuration.Path");
             if (configuration.Path.Length == 0)
-                throw new ArgumentOutOfRangeException("configuration.Path");
+                throw new ArgumentException("Value cannot be empty.", "configuration.Path");
             if (configuration.ReadBufferSize < 1)
                 throw new ArgumentOutOfRangeException("configuration.ReadBufferSize");
             if (configuration.WriteBufferSize < 1)
