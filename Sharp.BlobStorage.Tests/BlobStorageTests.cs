@@ -25,12 +25,15 @@ namespace Sharp.BlobStorage
     [TestFixture]
     public class BlobStorageTests
     {
+        private class TestConfiguration : BlobStorageConfiguration { }
+
         [Test]
         public void Put()
         {
-            var storage = new Mock<BlobStorage>(MockBehavior.Strict);
-            var stream  = new Mock<Stream     >(MockBehavior.Strict);
-            var uri     = new Uri("foo://bar/baz");
+            var configuration = new TestConfiguration();
+            var storage       = new Mock<BlobStorage>(MockBehavior.Strict, configuration);
+            var stream        = new Mock<Stream     >(MockBehavior.Strict);
+            var uri           = new Uri("foo://bar/baz");
 
             storage
                 .Setup(s => s.Put(It.IsAny<Stream>(), It.IsAny<string>()))
@@ -48,9 +51,10 @@ namespace Sharp.BlobStorage
         [Test]
         public void Get()
         {
-            var storage = new Mock<BlobStorage>(MockBehavior.Strict);
-            var stream  = new Mock<Stream     >(MockBehavior.Strict);
-            var uri     = new Uri("foo://bar/baz");
+            var configuration = new TestConfiguration();
+            var storage       = new Mock<BlobStorage>(MockBehavior.Strict, configuration);
+            var stream        = new Mock<Stream     >(MockBehavior.Strict);
+            var uri           = new Uri("foo://bar/baz");
 
             storage
                 .Setup(s => s.Get(It.IsAny<Uri>()))
