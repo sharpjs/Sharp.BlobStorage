@@ -158,7 +158,7 @@ namespace Sharp.BlobStorage.File
         public void GetAsync_RelativeUri()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri("file.txt", UriKind.Relative);
+            var uri     = new Uri("relative/file.txt", UriKind.Relative);
 
             Assert.ThrowsAsync<ArgumentException>(() =>
             {
