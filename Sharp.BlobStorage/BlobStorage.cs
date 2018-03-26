@@ -47,7 +47,9 @@ namespace Sharp.BlobStorage
             var baseUri = configuration.BaseUri;
             if (baseUri == null)
                 baseUri = new Uri(DefaultBaseUri, UriKind.Absolute);
-            else if (!baseUri.IsAbsoluteUri)
+            else if (baseUri.IsAbsoluteUri)
+                baseUri = baseUri.EnsurePathTrailingSlash();
+            else
                 throw UriExtensions.UriNotAbsoluteError(baseUri, "configuration.BaseUri");
 
             BaseUri = baseUri;
@@ -55,6 +57,7 @@ namespace Sharp.BlobStorage
 
         /// <summary>
         ///   Base URI of generated blob URIs.
+        ///   The path component of this URI always has a trailing slash.
         /// </summary>
         public Uri BaseUri { get; }
 
