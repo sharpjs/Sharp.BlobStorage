@@ -37,7 +37,8 @@ namespace Sharp.BlobStorage
         ///   <paramref name="configuration"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   <paramref name="configuration"/><c>.BaseUri</c> is a relative URI.
+        ///   <paramref name="configuration"/> is invalid:
+        ///     <c>BaseUri</c> is a relative URI.
         /// </exception>
         public BlobStorage(BlobStorageConfiguration configuration)
         {
