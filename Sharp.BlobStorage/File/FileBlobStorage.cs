@@ -75,13 +75,7 @@ namespace Sharp.BlobStorage.File
         /// <inheritdoc />
         public override Task<Stream> GetAsync(Uri uri)
         {
-            if (uri == null)
-                throw new ArgumentNullException(nameof(uri));
-            if (!uri.IsAbsoluteUri || !uri.IsFile)
-                throw new ArgumentOutOfRangeException(nameof(uri));
-            if (!uri.LocalPath.StartsWith(_basePath, StringComparison.OrdinalIgnoreCase))
-                // uri is not relative to _baseUri
-                throw new ArgumentOutOfRangeException(nameof(uri));
+            uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
 
             return Task.FromResult(OpenFileForRead(uri.LocalPath));
         }
@@ -115,7 +109,7 @@ namespace Sharp.BlobStorage.File
                 File_.Move(tempPath, realPath);
 
                 // Convert to 'file:' URI
-                return new Uri(realPath);
+                return new Uri(realPath).ChangeBase(_baseUri, BaseUri);
             }
             finally
             {

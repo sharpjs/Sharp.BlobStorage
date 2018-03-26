@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using Sharp.BlobStorage.Internal;
 using static System.IO.File;
 
 namespace Sharp.BlobStorage.File
@@ -126,13 +127,12 @@ namespace Sharp.BlobStorage.File
         public async Task GetAsync()
         {
             var storage = new FileBlobStorage(Configuration);
-            var path    = Path.Combine(Configuration.Path, "TestBlob.txt");
-            var uri     = new Uri(path);
+            var path    = Path.Combine(Configuration.Path, "file.txt");
+            var uri     = new Uri(storage.BaseUri, "file.txt");
 
             WriteAllText(path, TestText, Utf8);
 
             byte[] bytes;
-
             using (var stream = await storage.GetAsync(uri))
             using (var memory = new MemoryStream())
             {
@@ -155,24 +155,12 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public void GetAsync_NonFileUri()
-        {
-            var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri("https://example.com");
-
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
-        }
-
-        [Test]
         public void GetAsync_RelativeUri()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri("File.txt", UriKind.Relative);
+            var uri     = new Uri("file.txt", UriKind.Relative);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
                 return storage.GetAsync(uri);
             });
@@ -182,24 +170,9 @@ namespace Sharp.BlobStorage.File
         public void GetAsync_NotMyUri()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(@"Z:\Some\Other\Path.txt");
+            var uri     = new Uri(@"some://other/base/file.txt");
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
-        }
-
-        [Test]
-        public void GetAsync_MaliciousUri()
-        {
-            var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(
-                new Uri(Configuration.Path),
-                new Uri(@"..\..\..\..\Sharp.BlobStorage.sln", UriKind.Relative)
-            );
-
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
                 return storage.GetAsync(uri);
             });
@@ -209,8 +182,7 @@ namespace Sharp.BlobStorage.File
         public void GetAsync_NotFound()
         {
             var storage = new FileBlobStorage(Configuration);
-            var path    = Path.Combine(Configuration.Path, @"does\not\exist.txt");
-            var uri     = new Uri(path);
+            var uri     = new Uri(storage.BaseUri, "does/not/exist.txt");
 
             Assert.ThrowsAsync(Is.AssignableTo<IOException>(), () =>
             {
@@ -228,12 +200,13 @@ namespace Sharp.BlobStorage.File
             using (var stream = new MemoryStream(bytes))
                 uri = await storage.PutAsync(stream, ".txt");
 
-            uri           .Should().NotBeNull();
-            uri.IsFile    .Should().BeTrue();
-            uri.LocalPath .Should().StartWith(Configuration.Path + @"\");
-            uri.LocalPath .Should().EndWith(".txt");
+            uri                           .Should().NotBeNull();
+            uri.LocalPath                 .Should().EndWith(".txt");
+            storage.BaseUri.IsBaseOf(uri) .Should().BeTrue();
 
-            ReadAllText(uri.LocalPath, Utf8).Should().Be(TestText);
+            var realBaseUri = new Uri(Configuration.Path).EnsurePathTrailingSlash();
+            var path        = uri.ChangeBase(storage.BaseUri, realBaseUri).LocalPath;
+            ReadAllText(path, Utf8).Should().Be(TestText);
         }
 
         [Test]
