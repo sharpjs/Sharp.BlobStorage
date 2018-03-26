@@ -45,6 +45,9 @@ namespace Sharp.BlobStorage.File
         /// <exception cref="ArgumentOutOfRangeException">
         ///   <paramref name="configuration"/> is invalid.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="configuration"/> is invalid.
+        /// </exception>
         public FileBlobStorage(FileBlobStorageConfiguration configuration)
             : base(configuration)
         {

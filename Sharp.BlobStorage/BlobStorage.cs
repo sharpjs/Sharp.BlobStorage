@@ -36,11 +36,27 @@ namespace Sharp.BlobStorage
         /// <exception cref="ArgumentNullException">
         ///   <paramref name="configuration"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="configuration"/><c>.BaseUri</c> is a relative URI.
+        /// </exception>
         public BlobStorage(BlobStorageConfiguration configuration)
         {
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
+
+            var baseUri = configuration.BaseUri;
+            if (baseUri == null)
+                baseUri = new Uri(DefaultBaseUri, UriKind.Absolute);
+            else if (!baseUri.IsAbsoluteUri)
+                throw UriExtensions.UriNotAbsoluteError(baseUri, "configuration.BaseUri");
+
+            BaseUri = baseUri;
         }
+
+        /// <summary>
+        ///   Base URI of generated blob URIs.
+        /// </summary>
+        public Uri BaseUri { get; }
 
         /// <inheritdoc/>
         public virtual Stream Get(Uri uri)

@@ -45,6 +45,9 @@ namespace Sharp.BlobStorage.Azure
         /// <exception cref="ArgumentNullException">
         ///   <paramref name="configuration"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="configuration"/> is invalid.
+        /// </exception>
         public AzureBlobStorage(AzureBlobStorageConfiguration configuration)
             : base(configuration)
         {
