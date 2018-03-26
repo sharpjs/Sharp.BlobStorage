@@ -26,7 +26,7 @@ namespace Sharp.BlobStorage
     /// </summary>
     public abstract class BlobStorage : IBlobStorage
     {
-        private const string DefaultBaseUri = "blob:///";
+        internal const string DefaultBaseUri = "blob:///";
 
         /// <summary>
         ///   Creates a new <see cref="BlobStorage"/> instance with the

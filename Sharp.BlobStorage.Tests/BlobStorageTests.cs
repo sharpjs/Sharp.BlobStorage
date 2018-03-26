@@ -16,6 +16,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -26,6 +27,83 @@ namespace Sharp.BlobStorage
     public class BlobStorageTests
     {
         private class TestConfiguration : BlobStorageConfiguration { }
+
+        private class TestStorage : BlobStorage
+        {
+            public TestStorage(TestConfiguration configuration)
+                : base(configuration) { }
+
+            public override Task<Stream> GetAsync(Uri uri)
+                => throw new NotImplementedException();
+
+            public override Task<Uri> PutAsync(Stream stream, string extension = null)
+                => throw new NotImplementedException();
+        }
+
+        [Test]
+        public void Construct_NullConfiguration()
+        {
+            var configuration = null as TestConfiguration;
+
+            configuration
+                .Invoking(c => new TestStorage(c))
+                .Should().ThrowExactly<ArgumentNullException>();
+        }
+
+        [Test]
+        public void Construct_RelativeBaseUri()
+        {
+            var configuration = new TestConfiguration
+            {
+                BaseUri = new Uri("relative", UriKind.Relative)
+            };
+
+            configuration
+                .Invoking(c => new TestStorage(c))
+                .Should().ThrowExactly<ArgumentException>();
+        }
+
+        [Test]
+        public void Construct_NullBaseUri()
+        {
+            var expected      = new Uri(BlobStorage.DefaultBaseUri);
+            var configuration = new TestConfiguration();
+
+            var storage = new TestStorage(configuration);
+
+            storage.BaseUri.Should().Be(expected);
+        }
+
+        [Test]
+        public void Construct_NonSlashedBaseUri()
+        {
+            var original = new Uri("foo://bar/baz",  UriKind.Absolute);
+            var expected = new Uri("foo://bar/baz/", UriKind.Absolute);
+
+            var configuration = new TestConfiguration
+            {
+                BaseUri = original
+            };
+
+            var storage = new TestStorage(configuration);
+
+            storage.BaseUri.Should().Be(expected);
+        }
+
+        [Test]
+        public void Construct_SlashedBaseUri()
+        {
+            var expected = new Uri("foo://bar/baz/", UriKind.Absolute);
+
+            var configuration = new TestConfiguration
+            {
+                BaseUri = expected
+            };
+
+            var storage = new TestStorage(configuration);
+
+            storage.BaseUri.Should().Be(expected);
+        }
 
         [Test]
         public void Put()
