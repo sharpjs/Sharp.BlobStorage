@@ -63,10 +63,11 @@ namespace Sharp.BlobStorage.File
             _readBufferSize  = configuration.ReadBufferSize  ?? DefaultBufferSize;
             _writeBufferSize = configuration.WriteBufferSize ?? DefaultBufferSize;
             _basePath        = Directory.CreateDirectory(configuration.Path).FullName;
-            _baseUri         = new Uri(_basePath);
 
             if (_basePath[_basePath.Length - 1] != Path.DirectorySeparatorChar)
                 _basePath += Path.DirectorySeparatorChar;
+
+            _baseUri = new Uri(_basePath);
 
             //Log.Information("Using file-based blob storage at '{0}'.", _basePath);
         }
