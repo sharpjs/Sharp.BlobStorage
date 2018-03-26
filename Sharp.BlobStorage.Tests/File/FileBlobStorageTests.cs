@@ -253,7 +253,7 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var stream  = Mock.Of<Stream>(s => s.CanRead == false);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsAsync<ArgumentException>(() =>
             {
                 return storage.PutAsync(stream, ".dat");
             });

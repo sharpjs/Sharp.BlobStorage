@@ -92,7 +92,7 @@ namespace Sharp.BlobStorage.File
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
             if (!stream.CanRead)
-                throw new ArgumentOutOfRangeException(nameof(stream));
+                throw new ArgumentException(nameof(stream));
 
             // Compute paths
             var realPath   = Path.Combine(_basePath, GenerateFileName(extension));
