@@ -111,7 +111,7 @@ namespace Sharp.BlobStorage
             var configuration = new TestConfiguration();
             var storage       = new Mock<BlobStorage>(MockBehavior.Strict, configuration);
             var stream        = new Mock<Stream     >(MockBehavior.Strict);
-            var uri           = new Uri("foo://bar/baz");
+            var uri           = new Uri(BlobStorage.DefaultBaseUri + "TestFile.txt");
 
             storage
                 .Setup(s => s.Put(It.IsAny<Stream>(), It.IsAny<string>()))
@@ -132,7 +132,7 @@ namespace Sharp.BlobStorage
             var configuration = new TestConfiguration();
             var storage       = new Mock<BlobStorage>(MockBehavior.Strict, configuration);
             var stream        = new Mock<Stream     >(MockBehavior.Strict);
-            var uri           = new Uri("foo://bar/baz");
+            var uri           = new Uri(BlobStorage.DefaultBaseUri + "TestFile.txt");
 
             storage
                 .Setup(s => s.Get(It.IsAny<Uri>()))
