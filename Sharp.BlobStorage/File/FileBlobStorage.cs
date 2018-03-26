@@ -39,10 +39,15 @@ namespace Sharp.BlobStorage.File
         ///   specified configuration.
         /// </summary>
         /// <param name="configuration">The configuration to use.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="configuration"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="configuration"/> is invalid.
+        /// </exception>
         public FileBlobStorage(FileBlobStorageConfiguration configuration)
+            : base(configuration)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
             if (configuration.Path == null)
                 throw new ArgumentNullException("configuration.Path");
             if (configuration.Path.Length == 0)

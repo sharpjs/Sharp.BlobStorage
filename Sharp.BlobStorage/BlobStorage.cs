@@ -26,6 +26,22 @@ namespace Sharp.BlobStorage
     /// </summary>
     public abstract class BlobStorage : IBlobStorage
     {
+        private const string DefaultBaseUri = "blob:///";
+
+        /// <summary>
+        ///   Creates a new <see cref="BlobStorage"/> instance with the
+        ///   specified configuration.
+        /// </summary>
+        /// <param name="configuration">The configuration to use.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="configuration"/> is <c>null</c>.
+        /// </exception>
+        public BlobStorage(BlobStorageConfiguration configuration)
+        {
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
+        }
+
         /// <inheritdoc/>
         public virtual Stream Get(Uri uri)
         {

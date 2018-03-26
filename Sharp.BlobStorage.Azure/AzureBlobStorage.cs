@@ -42,10 +42,12 @@ namespace Sharp.BlobStorage.Azure
         ///   specified configuration.
         /// </summary>
         /// <param name="configuration">The configuration to use.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="configuration"/> is <c>null</c>.
+        /// </exception>
         public AzureBlobStorage(AzureBlobStorageConfiguration configuration)
+            : base(configuration)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
             if (configuration.ConnectionString == null)
                 throw new ArgumentNullException("configuration.ConnectionString");
             if (configuration.ContainerName == null)
