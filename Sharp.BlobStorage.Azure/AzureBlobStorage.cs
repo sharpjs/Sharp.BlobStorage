@@ -36,6 +36,7 @@ namespace Sharp.BlobStorage.Azure
         private readonly CloudStorageAccount _account;
         private readonly CloudBlobClient     _client;
         private readonly CloudBlobContainer  _container;
+        private readonly Uri                 _baseUri;
 
         /// <summary>
         ///   Creates a new <see cref="AzureBlobStorage"/> instance with the
@@ -62,6 +63,7 @@ namespace Sharp.BlobStorage.Azure
             _client.DefaultRequestOptions = RequestOptions;
 
             _container = _client.GetContainerReference(configuration.ContainerName);
+            _baseUri   = _container.Uri.EnsurePathTrailingSlash();
 
             //Log.Information("Using Azure blob storage: {0}", _container.Uri);
 
@@ -72,12 +74,7 @@ namespace Sharp.BlobStorage.Azure
         /// <inheritdoc/>
         public override Task<Stream> GetAsync(Uri uri)
         {
-            if (uri == null)
-                throw new ArgumentNullException(nameof(uri));
-            if (!uri.IsAbsoluteUri)
-                throw new ArgumentException($"The URI {uri} is not an absolute URI.", nameof(uri));
-            if (!_container.Uri.IsBaseOf(uri))
-                throw new ArgumentException($"The URI '{uri}' is not contained by the storage provider.");
+            uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
 
             var blob = new CloudBlockBlob(uri, _account.Credentials);
             blob.StreamMinimumReadSizeInBytes = DownloadBlockSizeInBytes;
@@ -110,7 +107,7 @@ namespace Sharp.BlobStorage.Azure
                 operationContext: null
             );
 
-            return blob.Uri;
+            return blob.Uri.ChangeBase(_baseUri, BaseUri);
         }
 
         private static string GenerateFileName(string extension)

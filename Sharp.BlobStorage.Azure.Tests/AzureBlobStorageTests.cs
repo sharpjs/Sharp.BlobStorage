@@ -23,6 +23,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Moq;
 using NUnit.Framework;
+using Sharp.BlobStorage.Internal;
 
 namespace Sharp.BlobStorage.Azure
 {
@@ -94,9 +95,9 @@ namespace Sharp.BlobStorage.Azure
         {
             var blob = Container.GetBlockBlobReference("test/file.txt");
             await blob.UploadTextAsync(TestText, Utf8, null, null, null);
-            var uri = blob.Uri;
 
             var storage = new AzureBlobStorage(Configuration);
+            var uri     = blob.Uri.ChangeBase(Container.Uri.EnsurePathTrailingSlash(), storage.BaseUri);
 
             byte[] bytes;
             using (var stream = await storage.GetAsync(uri))
@@ -136,19 +137,7 @@ namespace Sharp.BlobStorage.Azure
         public void GetAsync_NotMyUri()
         {
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = new Uri("https://example.com/not/my/uri");
-
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
-        }
-
-        [Test]
-        public void GetAsync_MaliciousUri()
-        {
-            var storage = new AzureBlobStorage(Configuration);
-            var uri     = new Uri(Container.Uri, "../other-container/file.txt");
+            var uri     = new Uri("some://other/base/file.txt");
 
             Assert.ThrowsAsync<ArgumentException>(() =>
             {
@@ -160,7 +149,7 @@ namespace Sharp.BlobStorage.Azure
         public void GetAsync_NotFound()
         {
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = new Uri(Container.Uri, "does/not/exist.txt");
+            var uri     = new Uri(storage.BaseUri, "does/not/exist.txt");
 
             Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), () =>
             {
@@ -181,11 +170,13 @@ namespace Sharp.BlobStorage.Azure
                 uri = await storage.PutAsync(stream, extension);
 
             uri              .Should().NotBeNull();
-            uri              .Should().Match<Uri>(u => Container.Uri.IsBaseOf(u));
+            uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
             uri.AbsolutePath .Should().EndWith(".txt");
 
-            var blob = new CloudBlockBlob(uri, Account.Credentials);
-            var text = await blob.DownloadTextAsync(Utf8, null, null, null);
+            var realBaseUri = Container.Uri.EnsurePathTrailingSlash();
+            var realBlobUri = uri.ChangeBase(storage.BaseUri, realBaseUri);
+            var blob        = new CloudBlockBlob(realBlobUri, Account.Credentials);
+            var text        = await blob.DownloadTextAsync(Utf8, null, null, null);
             text.Should().Be(TestText);
         }
 
