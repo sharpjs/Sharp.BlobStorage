@@ -88,6 +88,10 @@ namespace Sharp.BlobStorage.File
             if (!stream.CanRead)
                 throw new ArgumentException(nameof(stream));
 
+            // Ensure extension is dot-prefixed
+            if (extension?.Length > 0 && extension[0] != '.')
+                extension = "." + extension;
+
             // Compute paths
             var realPath   = Path.Combine(_basePath, GenerateFileName(extension));
             var tempPath   = Path.ChangeExtension(realPath, ".upl");

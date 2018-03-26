@@ -191,14 +191,16 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public async Task PutAsync()
+        [TestCase("txt")]
+        [TestCase(".txt")]
+        public async Task PutAsync(string extension)
         {
             var storage = new FileBlobStorage(Configuration);
             var bytes   = Utf8.GetBytes(TestText);
 
             Uri uri;
             using (var stream = new MemoryStream(bytes))
-                uri = await storage.PutAsync(stream, ".txt");
+                uri = await storage.PutAsync(stream, extension);
 
             uri              .Should().NotBeNull();
             uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
