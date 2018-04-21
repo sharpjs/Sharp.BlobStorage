@@ -119,11 +119,13 @@ namespace Sharp.BlobStorage
 
             storage
                 .Setup(s => s.PutAsync(stream.Object, ".dat"))
-                .ReturnsAsync(uri);
+                .ReturnsAsync(uri)
+                .Verifiable();
 
             var result = storage.Object.Put(stream.Object, ".dat");
             
             result.Should().BeSameAs(uri);
+            storage.Verify();
         }
 
         [Test]
@@ -140,11 +142,13 @@ namespace Sharp.BlobStorage
 
             storage
                 .Setup(s => s.GetAsync(uri))
-                .ReturnsAsync(stream.Object);
+                .ReturnsAsync(stream.Object)
+                .Verifiable();
 
             var result = storage.Object.Get(uri);
             
             result.Should().BeSameAs(stream.Object);
+            storage.Verify();
         }
     }
 }
