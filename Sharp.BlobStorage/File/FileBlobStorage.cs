@@ -18,7 +18,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Sharp.BlobStorage.Internal;
-using File_ = System.IO.File;
 
 namespace Sharp.BlobStorage.File
 {
@@ -29,10 +28,11 @@ namespace Sharp.BlobStorage.File
     {
         private const int DefaultBufferSize = 1 * 1024 * 1024; // 1 MB
 
-        private readonly string _basePath;
-        private readonly Uri    _baseUri;
-        private readonly int    _readBufferSize;
-        private readonly int    _writeBufferSize;
+        private readonly string     _basePath;
+        private readonly Uri        _baseUri;
+        private readonly int        _readBufferSize;
+        private readonly int        _writeBufferSize;
+        private readonly FileSystem _fileSystem;
 
         /// <summary>
         ///   Creates a new <see cref="FileBlobStorage"/> instance with the
@@ -60,16 +60,25 @@ namespace Sharp.BlobStorage.File
             if (configuration.WriteBufferSize < 1)
                 throw new ArgumentOutOfRangeException("configuration.WriteBufferSize");
 
-            _readBufferSize  = configuration.ReadBufferSize  ?? DefaultBufferSize;
-            _writeBufferSize = configuration.WriteBufferSize ?? DefaultBufferSize;
-            _basePath        = Directory.CreateDirectory(configuration.Path).FullName;
+            _fileSystem = FileSystem.Default;
+            _basePath   = _fileSystem.CreateDirectory(configuration.Path);
 
             if (_basePath[_basePath.Length - 1] != Path.DirectorySeparatorChar)
                 _basePath += Path.DirectorySeparatorChar;
 
             _baseUri = new Uri(_basePath);
 
+            _readBufferSize  = configuration.ReadBufferSize  ?? DefaultBufferSize;
+            _writeBufferSize = configuration.WriteBufferSize ?? DefaultBufferSize;
+
             //Log.Information("Using file-based blob storage at '{0}'.", _basePath);
+        }
+
+        // Allows tests to override filesystem operations
+        internal FileBlobStorage(FileBlobStorageConfiguration configuration, FileSystem fileSystem)
+            : this(configuration)
+        {
+            _fileSystem = fileSystem;
         }
 
         /// <inheritdoc />
@@ -77,7 +86,7 @@ namespace Sharp.BlobStorage.File
         {
             uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
 
-            return Task.FromResult(OpenFileForRead(uri.LocalPath));
+            return Task.FromResult(_fileSystem.OpenFileForRead(uri.LocalPath, _readBufferSize));
         }
 
         /// <inheritdoc />
@@ -102,15 +111,15 @@ namespace Sharp.BlobStorage.File
             try
             {
                 // Ensure directory exists to contain the file
-                Directory.CreateDirectory(parentPath);
+                _fileSystem.CreateDirectory(parentPath);
 
                 // Write temp file
-                using (var target = OpenFileForWrite(tempPath))
+                using (var target = _fileSystem.OpenFileForWrite(tempPath, _writeBufferSize))
                     await stream.CopyToAsync(target, _writeBufferSize);
 
                 // Rename fully-written temp file to final path
                 // NOTE: throws if the final path exists
-                File_.Move(tempPath, realPath);
+                _fileSystem.MoveFile(tempPath, realPath);
 
                 // Convert to 'file:' URI
                 return new Uri(realPath).ChangeBase(_baseUri, BaseUri);
@@ -119,7 +128,7 @@ namespace Sharp.BlobStorage.File
             {
                 // Make best effort to clean up, but do not allow an exception
                 // thrown here to obscure any exception from the try block.
-                try { File_.Delete(tempPath); } catch { }
+                try { _fileSystem.DeleteFile(tempPath); } catch { }
             }
         }
 
@@ -130,9 +139,9 @@ namespace Sharp.BlobStorage.File
                 .ChangeBase(BaseUri, _baseUri) // also validates uri
                 .LocalPath;
 
-            // Check for existence first, as File_.Delete does not return any
+            // Check for existence first, as File.Delete does not return any
             // indicator of prior existence.  Does not throw.
-            if (!File_.Exists(path))
+            if (!_fileSystem.FileExists(path))
                 return false;
 
             // Delete the file, plus any directories left empty afterwards
@@ -140,18 +149,6 @@ namespace Sharp.BlobStorage.File
             CleanUpSubdirectories(path);
             return true;
         }
-
-        private Stream OpenFileForRead(string path)
-            => new FileStream(
-                path, FileMode.Open, FileAccess.Read, FileShare.Read,
-                _readBufferSize, useAsync: true
-            );
-
-        private Stream OpenFileForWrite(string path)
-            => new FileStream(
-                path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                _writeBufferSize, useAsync: true
-            );
 
         private static string GenerateFileName(string extension)
             => RandomFileNames.Next(separator: '\\', extension);
@@ -166,7 +163,7 @@ namespace Sharp.BlobStorage.File
             {
                 try
                 {
-                    File_.Delete(path);
+                    _fileSystem.DeleteFile(path);
                     return;
                 }
                 catch (DirectoryNotFoundException) // : IOException
@@ -205,7 +202,7 @@ namespace Sharp.BlobStorage.File
                 // Delete directory with best effort.  Do not report errors
                 // (ex: directory not empty), because the delete operation has
                 // succeeded at this point.
-                try { Directory.Delete(path); } catch { return; }
+                try { _fileSystem.DeleteDirectory(path); } catch { return; }
             }
         }
 
