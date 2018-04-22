@@ -27,7 +27,6 @@ using File_ = System.IO.File;
 namespace Sharp.BlobStorage.File
 {
     [TestFixture]
-    [SingleThreaded] // Becuase PutAsync_FileSystemChanged needs to damage the repository.
     public class FileBlobStorageTests
     {
         const string TestText = "Testing, testing, one two three.";
