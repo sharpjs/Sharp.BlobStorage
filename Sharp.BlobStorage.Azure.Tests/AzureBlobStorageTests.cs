@@ -79,42 +79,37 @@ namespace Sharp.BlobStorage.Azure
         [Test]
         public void Construct_NullConfiguration()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new AzureBlobStorage(null);
-            });
+            this.Invoking(_ => new AzureBlobStorage(null))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
         public void Construct_NullConfigurationConnectionString()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var configuration = Configuration.Clone();
-                configuration.ConnectionString = null;
-                new AzureBlobStorage(configuration);
-            });
+            var configuration = Configuration.Clone();
+            configuration.ConnectionString = null;
+
+            this.Invoking(_ => new AzureBlobStorage(configuration))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
         public void Construct_NullConfigurationContainerName()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var configuration = Configuration.Clone();
-                configuration.ContainerName = null;
-                new AzureBlobStorage(configuration);
-            });
+            var configuration = Configuration.Clone();
+            configuration.ContainerName = null;
+
+            this.Invoking(_ => new AzureBlobStorage(configuration))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
         public async Task GetAsync()
         {
-            var blob = Container.GetBlockBlobReference("test/file.txt");
-            await blob.UploadTextAsync(TestText, Utf8, null, null, null);
-
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = blob.Uri.ChangeBase(Container.Uri.EnsurePathTrailingSlash(), storage.BaseUri);
+            var uri     = new Uri(storage.BaseUri, "a/file.txt");
+
+            await WriteBlobAsync("a/file.txt");
 
             byte[] bytes;
             using (var stream = await storage.GetAsync(uri))
@@ -132,10 +127,9 @@ namespace Sharp.BlobStorage.Azure
         {
             var storage = new AzureBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() =>
-            {
-                return storage.GetAsync(null);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(null))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
@@ -144,10 +138,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri("relative/file.txt", UriKind.Relative);
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
@@ -156,10 +149,9 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri("some://other/base/file.txt");
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
@@ -168,14 +160,13 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "does/not/exist.txt");
 
-            Assert.ThrowsAsync(Is.AssignableTo<StorageException>(), () =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<StorageException>();
         }
 
         [Test]
-        [TestCase("txt")]
+        [TestCase( "txt")]
         [TestCase(".txt")]
         public async Task PutAsync(string extension)
         {
@@ -190,10 +181,8 @@ namespace Sharp.BlobStorage.Azure
             uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
             uri.AbsolutePath .Should().EndWith(".txt");
 
-            var realBaseUri = Container.Uri.EnsurePathTrailingSlash();
-            var realBlobUri = uri.ChangeBase(storage.BaseUri, realBaseUri);
-            var blob        = new CloudBlockBlob(realBlobUri, Account.Credentials);
-            var text        = await blob.DownloadTextAsync(Utf8, null, null, null);
+            var blobUri = BlobUri(uri, storage);
+            var text    = await ReadBlobAsync(blobUri);
             text.Should().Be(TestText);
         }
 
@@ -202,10 +191,9 @@ namespace Sharp.BlobStorage.Azure
         {
             var storage = new AzureBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() =>
-            {
-                return storage.PutAsync(null, ".dat");
-            });
+            storage
+                .Awaiting(s => s.PutAsync(null, ".dat"))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
@@ -214,20 +202,22 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var stream  = Mock.Of<Stream>(s => s.CanRead == false);
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.PutAsync(stream, ".dat");
-            });
+            storage
+                .Awaiting(s => s.PutAsync(stream, ".dat"))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
         public async Task DeleteAsync_Exists()
         {
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = BlobUriFor("a/b/file.txt", storage);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
             await WriteBlobAsync("a/b/file.txt");
-            await WriteBlobAsync("a/other.txt");
+            await WriteBlobAsync("a/other.txt" );
+
+            (await BlobExistsAsync ("a/b/file.txt"))
+                .Should().BeTrue("blob should exist prior to deletion");
 
             var result = await storage.DeleteAsync(uri);
 
@@ -244,7 +234,7 @@ namespace Sharp.BlobStorage.Azure
         public async Task DeleteAsync_DoesNotExist()
         {
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = BlobUriFor("a/b/file.txt", storage);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
             var result = await storage.DeleteAsync(uri);
 
@@ -276,26 +266,34 @@ namespace Sharp.BlobStorage.Azure
         public void DeleteAsync_NotMyUri()
         {
             var storage = new AzureBlobStorage(Configuration);
-            var uri     = new Uri(@"some://other/base/file.txt");
+            var uri     = new Uri("some://other/base/file.txt");
 
             storage
                 .Awaiting(s => s.DeleteAsync(uri))
                 .Should().Throw<ArgumentException>();
         }
 
+        // Blob helpers
+
+        private Uri BlobUri(Uri uri, AzureBlobStorage storage)
+            => uri
+                .ChangeBase(
+                    storage.BaseUri,
+                    Container.Uri.EnsurePathTrailingSlash()
+                );
+
         private Task<bool> BlobExistsAsync(string path)
             => Container
                 .GetBlockBlobReference(path)
                 .ExistsAsync();
 
+        private Task<string> ReadBlobAsync(Uri uri)
+            => new CloudBlockBlob(uri, Account.Credentials)
+                .DownloadTextAsync(Utf8, null, null, null);
+
         private Task WriteBlobAsync(string path)
             => Container
                 .GetBlockBlobReference(path)
                 .UploadTextAsync(TestText, Utf8, null, null, null);
-
-        private Uri BlobUriFor(string path, AzureBlobStorage storage)
-            => Container
-                .GetBlockBlobReference(path).Uri
-                .ChangeBase(Container.Uri.EnsurePathTrailingSlash(), storage.BaseUri);
     }
 }

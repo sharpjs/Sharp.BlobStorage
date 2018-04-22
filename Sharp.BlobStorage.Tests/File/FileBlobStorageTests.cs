@@ -64,79 +64,77 @@ namespace Sharp.BlobStorage.File
         [Test]
         public void Construct_NullConfiguration()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new FileBlobStorage(null);
-            });
+            this.Invoking(_ => new FileBlobStorage(null))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
         public void Construct_NullConfigurationPath()
         {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new FileBlobStorage(new FileBlobStorageConfiguration());
-            });
+            var configuration = new FileBlobStorageConfiguration();
+
+            this.Invoking(_ => new FileBlobStorage(configuration))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
         public void Construct_EmptyConfigurationPath()
         {
-            Assert.Throws<ArgumentException>(() =>
+            var configuration = new FileBlobStorageConfiguration
             {
-                new FileBlobStorage(new FileBlobStorageConfiguration
-                {
-                    Path = string.Empty
-                });
-            });
+                Path = string.Empty
+            };
+
+            this.Invoking(c => new FileBlobStorage(configuration))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
         public void Construct_InvalidConfigurationPath()
         {
-            Assert.Throws(Is.AssignableTo<Exception>(), () =>
+            var configuration = new FileBlobStorageConfiguration
             {
-                new FileBlobStorage(new FileBlobStorageConfiguration
-                {
-                    Path = "<*> not a valid path <*>"
-                });
-            });
+                Path = "<*> not a valid path <*>"
+            };
+
+            this.Invoking(c => new FileBlobStorage(configuration))
+                .Should().Throw<Exception>();
         }
 
         [Test]
         public void Construct_ConfigurationReadBufferSizeOutOfRange()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var configuration = new FileBlobStorageConfiguration
             {
-                new FileBlobStorage(new FileBlobStorageConfiguration
-                {
-                    Path           = Configuration.Path,
-                    ReadBufferSize = -1,
-                });
-            });
+                Path           = Configuration.Path,
+                ReadBufferSize = -1,
+            };
+
+            this.Invoking(c => new FileBlobStorage(configuration))
+                .Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [Test]
         public void Construct_ConfigurationWriteBufferSizeOutOfRange()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            var configuration = new FileBlobStorageConfiguration
             {
-                new FileBlobStorage(new FileBlobStorageConfiguration
-                {
-                    Path            = Configuration.Path,
-                    WriteBufferSize = -1,
-                });
-            });
+                Path            = Configuration.Path,
+                WriteBufferSize = -1,
+            };
+
+            this.Invoking(c => new FileBlobStorage(configuration))
+                .Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [Test]
         public async Task GetAsync()
         {
             var storage = new FileBlobStorage(Configuration);
-            var path    = Path.Combine(Configuration.Path, "file.txt");
-            var uri     = new Uri(storage.BaseUri, "file.txt");
+            var uri     = new Uri(storage.BaseUri, "a/file.txt");
 
-            WriteFile(path);
+            CreateDirectory (@"a");
+            WriteFile       (@"a\file.txt");
 
             byte[] bytes;
             using (var stream = await storage.GetAsync(uri))
@@ -154,10 +152,9 @@ namespace Sharp.BlobStorage.File
         {
             var storage = new FileBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() =>
-            {
-                return storage.GetAsync(null);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(null))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
@@ -166,22 +163,20 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri("relative/file.txt", UriKind.Relative);
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
         public void GetAsync_NotMyUri()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(@"some://other/base/file.txt");
+            var uri     = new Uri("some://other/base/file.txt");
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
@@ -190,14 +185,13 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "does/not/exist.txt");
 
-            Assert.ThrowsAsync(Is.AssignableTo<IOException>(), () =>
-            {
-                return storage.GetAsync(uri);
-            });
+            storage
+                .Awaiting(s => s.GetAsync(uri))
+                .Should().Throw<IOException>();
         }
 
         [Test]
-        [TestCase("txt")]
+        [TestCase( "txt")]
         [TestCase(".txt")]
         public async Task PutAsync(string extension)
         {
@@ -212,8 +206,7 @@ namespace Sharp.BlobStorage.File
             uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
             uri.AbsolutePath .Should().EndWith(".txt");
 
-            var realBaseUri = new Uri(Configuration.Path).EnsurePathTrailingSlash();
-            var path        = uri.ChangeBase(storage.BaseUri, realBaseUri).LocalPath;
+            var path = FilePath(uri, storage);
             ReadFile(path).Should().Be(TestText);
         }
 
@@ -222,10 +215,9 @@ namespace Sharp.BlobStorage.File
         {
             var storage = new FileBlobStorage(Configuration);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() =>
-            {
-                return storage.PutAsync(null, ".dat");
-            });
+            storage
+                .Awaiting(s => s.PutAsync(null, ".dat"))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [Test]
@@ -234,10 +226,9 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var stream  = Mock.Of<Stream>(s => s.CanRead == false);
 
-            Assert.ThrowsAsync<ArgumentException>(() =>
-            {
-                return storage.PutAsync(stream, ".dat");
-            });
+            storage
+                .Awaiting(s => s.PutAsync(stream, ".dat"))
+                .Should().Throw<ArgumentException>();
         }
 
         [Test]
@@ -248,18 +239,20 @@ namespace Sharp.BlobStorage.File
                 var storage = new FileBlobStorage(Configuration);
                 var bytes   = Utf8.GetBytes(TestText);
 
-                Directory.Delete(Configuration.Path, recursive: true);
-                File_.WriteAllText(Configuration.Path, "same name as desired directory");
+                DeleteDirectory (@"");
+                WriteFile       (@""); // same name as repository directory
 
                 using (var stream = new MemoryStream(bytes))
-                    Assert.ThrowsAsync(
-                        Is.AssignableTo<IOException>().And.Message.Contains("with the same name already exists"),
-                        () => storage.PutAsync(stream, ".txt")
-                    );
+                {
+                    storage
+                        .Awaiting(s => s.PutAsync(stream, ".txt"))
+                        .Should().Throw<IOException>()
+                        .Which.Message.Should().Contain("with the same name already exists");
+                }
             }
             finally
             {
-                DeleteFile(Configuration.Path);
+                DeleteFile(@"");
             }
         }
 
@@ -267,11 +260,12 @@ namespace Sharp.BlobStorage.File
         public async Task DeleteAsync_Exists()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(storage.BaseUri, @"a/b/file.txt");
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
             CreateDirectory (@"a\b");
             WriteFile       (@"a\b\file.txt");
             WriteFile       (@"a\other.txt");
+            FileExists      (@"a\b\file.txt") .Should().BeTrue("file should exist prior to deletion");
 
             var result = await storage.DeleteAsync(uri);
 
@@ -288,7 +282,7 @@ namespace Sharp.BlobStorage.File
         public async Task DeleteAsync_DoesNotExist()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(storage.BaseUri, @"a/b/file.txt");
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
             var result = await storage.DeleteAsync(uri);
 
@@ -320,7 +314,7 @@ namespace Sharp.BlobStorage.File
         public void DeleteAsync_NotMyUri()
         {
             var storage = new FileBlobStorage(Configuration);
-            var uri     = new Uri(@"some://other/base/file.txt");
+            var uri     = new Uri("some://other/base/file.txt");
 
             storage
                 .Awaiting(s => s.DeleteAsync(uri))
@@ -328,6 +322,14 @@ namespace Sharp.BlobStorage.File
         }
 
         // File helpers
+
+        private string FilePath(Uri uri, FileBlobStorage storage)
+            => uri
+                .ChangeBase(
+                    storage.BaseUri,
+                    new Uri(Configuration.Path).EnsurePathTrailingSlash()
+                )
+                .LocalPath;
 
         private bool FileExists(string path)
             => File_.Exists(Path.Combine(Configuration.Path, path));
