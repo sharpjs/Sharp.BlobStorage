@@ -23,7 +23,6 @@ using Moq;
 using NUnit.Framework;
 using Sharp.BlobStorage.Internal;
 using File_ = System.IO.File;
-using static System.IO.File;
 
 namespace Sharp.BlobStorage.File
 {
@@ -132,7 +131,7 @@ namespace Sharp.BlobStorage.File
             var path    = Path.Combine(Configuration.Path, "file.txt");
             var uri     = new Uri(storage.BaseUri, "file.txt");
 
-            WriteAllText(path, TestText, Utf8);
+            WriteFile(path);
 
             byte[] bytes;
             using (var stream = await storage.GetAsync(uri))
@@ -210,7 +209,7 @@ namespace Sharp.BlobStorage.File
 
             var realBaseUri = new Uri(Configuration.Path).EnsurePathTrailingSlash();
             var path        = uri.ChangeBase(storage.BaseUri, realBaseUri).LocalPath;
-            ReadAllText(path, Utf8).Should().Be(TestText);
+            ReadFile(path).Should().Be(TestText);
         }
 
         [Test]
@@ -245,7 +244,7 @@ namespace Sharp.BlobStorage.File
                 var bytes   = Utf8.GetBytes(TestText);
 
                 Directory.Delete(Configuration.Path, recursive: true);
-                WriteAllText(Configuration.Path, "same name as desired directory");
+                File_.WriteAllText(Configuration.Path, "same name as desired directory");
 
                 using (var stream = new MemoryStream(bytes))
                     Assert.ThrowsAsync(
@@ -255,7 +254,7 @@ namespace Sharp.BlobStorage.File
             }
             finally
             {
-                Delete(Configuration.Path);
+                DeleteFile(Configuration.Path);
             }
         }
 
@@ -328,6 +327,12 @@ namespace Sharp.BlobStorage.File
 
         private void WriteFile(string path)
             => File_.WriteAllText(Path.Combine(Configuration.Path, path), TestText, Utf8);
+
+        private string ReadFile(string path)
+            => File_.ReadAllText(Path.Combine(Configuration.Path, path), Utf8);
+
+        private void DeleteFile(string path)
+            => File_.Delete(Path.Combine(Configuration.Path, path));
 
         private bool DirectoryExists(string path)
             => Directory.Exists(Path.Combine(Configuration.Path, path));
