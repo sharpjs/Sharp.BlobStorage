@@ -55,6 +55,12 @@ namespace Sharp.BlobStorage.File
             };
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            DeleteDirectory(Configuration.Path);
+        }
+
         [Test]
         public void Construct_NullConfiguration()
         {
@@ -342,5 +348,11 @@ namespace Sharp.BlobStorage.File
 
         private void CreateDirectory(string path)
             => Directory.CreateDirectory(Path.Combine(Configuration.Path, path));
+
+        private void DeleteDirectory(string path)
+        {
+            try { Directory.Delete(Path.Combine(Configuration.Path, path), recursive: true); }
+            catch (DirectoryNotFoundException) { }
+        }
     }
 }
