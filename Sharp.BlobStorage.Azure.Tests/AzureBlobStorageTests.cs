@@ -45,10 +45,21 @@ namespace Sharp.BlobStorage.Azure
         [SetUp]
         public void SetUp()
         {
+            const int ContainerNameMaxLength = 63;
+
+            var name
+                = "test-"
+                + TestContext.CurrentContext.Test.MethodName
+                    .ToLowerInvariant()
+                    .Replace('_', '-');
+
+            if (name.Length > ContainerNameMaxLength)
+                name = name.Substring(0, ContainerNameMaxLength);
+
             Configuration = new AzureBlobStorageConfiguration
             {
                 ConnectionString = "UseDevelopmentStorage=true",
-                ContainerName    = "blob-storage-tests",
+                ContainerName    = name,
             };
 
             Account   = CloudStorageAccount.Parse(Configuration.ConnectionString);
@@ -57,6 +68,12 @@ namespace Sharp.BlobStorage.Azure
 
             Container.DeleteIfExists();
             Container.Create();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Container.DeleteIfExists();
         }
 
         [Test]
