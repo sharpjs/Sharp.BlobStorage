@@ -36,6 +36,7 @@ namespace Sharp.BlobStorage.File
             throwOnInvalidBytes:             true
         );
 
+        private Mock<FileSystem>             FileSystem;
         private FileBlobStorageConfiguration Configuration;
 
         [SetUp]
@@ -53,6 +54,8 @@ namespace Sharp.BlobStorage.File
                 ReadBufferSize  = 8192,
                 WriteBufferSize = 4096,
             };
+
+            FileSystem = new Mock<FileSystem> { CallBase = true };
         }
 
         [TearDown]
@@ -257,15 +260,36 @@ namespace Sharp.BlobStorage.File
         }
 
         [Test]
-        public async Task DeleteAsync_Exists()
+        public async Task DeleteAsync_Exists_DirectoryEmpty()
         {
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
             CreateDirectory (@"a\b");
             WriteFile       (@"a\b\file.txt");
-            WriteFile       (@"a\other.txt");
             FileExists      (@"a\b\file.txt") .Should().BeTrue("file should exist prior to deletion");
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeTrue();
+
+            FileExists      (@"a\b\file.txt") .Should().BeFalse("file should have been deleted");
+            DirectoryExists (@"a\b")          .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"a")            .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"")             .Should().BeTrue ("repository base directory should NOT have been deleted");
+        }
+
+        [Test]
+        public async Task DeleteAsync_Exists_DirectoryNotEmpty()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
+
+            CreateDirectory (@"a\b");
+            WriteFile       (@"a\b\file.txt");
+            WriteFile       (@"a\other.txt"); // <-- additional file
+            FileExists      (@"a\b\file.txt") .Should().BeTrue("file should exist prior to deletion");
+            FileExists      (@"a\other.txt")  .Should().BeTrue("file should exist");
 
             var result = await storage.DeleteAsync(uri);
 
@@ -287,6 +311,94 @@ namespace Sharp.BlobStorage.File
             var result = await storage.DeleteAsync(uri);
 
             result.Should().BeFalse();
+        }
+
+        [Test]
+        public async Task DeleteAsync_Retry_Succeed()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
+
+            storage.FileSystem = FileSystem.Object;
+
+            FileSystem
+                .Setup(f => f.FileExists(It.IsAny<string>()))
+                .Returns(true);
+
+            FileSystem
+                .SetupSequence(f => f.DeleteFile(It.IsAny<string>()))
+                .Throws<IOException>()
+                .Pass();
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeTrue();
+        }
+
+        [Test]
+        public void DeleteAsync_Retry_Fail()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
+
+            storage.FileSystem = FileSystem.Object;
+
+            FileSystem
+                .Setup(f => f.FileExists(It.IsAny<string>()))
+                .Returns(true);
+
+            FileSystem
+                .Setup(f => f.DeleteFile(It.IsAny<string>()))
+                .Throws<IOException>();
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<IOException>();
+        }
+
+        [Test]
+        public async Task DeleteAsync_DirectoryNotFound()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
+
+            storage.FileSystem = FileSystem.Object;
+
+            FileSystem
+                .Setup(f => f.FileExists(It.IsAny<string>()))
+                .Returns(true)
+                .Verifiable();
+
+            FileSystem
+                .Setup(f => f.DeleteFile(It.IsAny<string>()))
+                .Throws<DirectoryNotFoundException>()
+                .Verifiable(); // directory deleted after existence check
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeTrue();
+            FileSystem.Verify();
+        }
+
+        [Test]
+        public void DeleteAsync_PathTooLong()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
+
+            storage.FileSystem = FileSystem.Object;
+
+            FileSystem
+                .Setup(f => f.FileExists(It.IsAny<string>()))
+                .Returns(true);
+
+            FileSystem
+                .Setup(f => f.DeleteFile(It.IsAny<string>()))
+                .Throws<PathTooLongException>(); // should never happen, but coverage
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<PathTooLongException>();
         }
 
         [Test]
