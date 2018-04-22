@@ -28,11 +28,10 @@ namespace Sharp.BlobStorage.File
     {
         private const int DefaultBufferSize = 1 * 1024 * 1024; // 1 MB
 
-        private readonly string     _basePath;
-        private readonly Uri        _baseUri;
-        private readonly int        _readBufferSize;
-        private readonly int        _writeBufferSize;
-        private readonly FileSystem _fileSystem;
+        private readonly string _basePath;
+        private readonly Uri    _baseUri;
+        private readonly int    _readBufferSize;
+        private readonly int    _writeBufferSize;
 
         /// <summary>
         ///   Creates a new <see cref="FileBlobStorage"/> instance with the
@@ -60,8 +59,7 @@ namespace Sharp.BlobStorage.File
             if (configuration.WriteBufferSize < 1)
                 throw new ArgumentOutOfRangeException("configuration.WriteBufferSize");
 
-            _fileSystem = FileSystem.Default;
-            _basePath   = _fileSystem.CreateDirectory(configuration.Path);
+            _basePath = FileSystem.CreateDirectory(configuration.Path);
 
             if (_basePath[_basePath.Length - 1] != Path.DirectorySeparatorChar)
                 _basePath += Path.DirectorySeparatorChar;
@@ -75,18 +73,14 @@ namespace Sharp.BlobStorage.File
         }
 
         // Allows tests to override filesystem operations
-        internal FileBlobStorage(FileBlobStorageConfiguration configuration, FileSystem fileSystem)
-            : this(configuration)
-        {
-            _fileSystem = fileSystem;
-        }
+        internal FileSystem FileSystem { get; set; } = FileSystem.Default;
 
         /// <inheritdoc />
         public override Task<Stream> GetAsync(Uri uri)
         {
             uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
 
-            return Task.FromResult(_fileSystem.OpenFileForRead(uri.LocalPath, _readBufferSize));
+            return Task.FromResult(FileSystem.OpenFileForRead(uri.LocalPath, _readBufferSize));
         }
 
         /// <inheritdoc />
@@ -111,15 +105,15 @@ namespace Sharp.BlobStorage.File
             try
             {
                 // Ensure directory exists to contain the file
-                _fileSystem.CreateDirectory(parentPath);
+                FileSystem.CreateDirectory(parentPath);
 
                 // Write temp file
-                using (var target = _fileSystem.OpenFileForWrite(tempPath, _writeBufferSize))
+                using (var target = FileSystem.OpenFileForWrite(tempPath, _writeBufferSize))
                     await stream.CopyToAsync(target, _writeBufferSize);
 
                 // Rename fully-written temp file to final path
                 // NOTE: throws if the final path exists
-                _fileSystem.MoveFile(tempPath, realPath);
+                FileSystem.MoveFile(tempPath, realPath);
 
                 // Convert to 'file:' URI
                 return new Uri(realPath).ChangeBase(_baseUri, BaseUri);
@@ -128,7 +122,7 @@ namespace Sharp.BlobStorage.File
             {
                 // Make best effort to clean up, but do not allow an exception
                 // thrown here to obscure any exception from the try block.
-                try { _fileSystem.DeleteFile(tempPath); } catch { }
+                try { FileSystem.DeleteFile(tempPath); } catch { }
             }
         }
 
@@ -141,7 +135,7 @@ namespace Sharp.BlobStorage.File
 
             // Check for existence first, as File.Delete does not return any
             // indicator of prior existence.  Does not throw.
-            if (!_fileSystem.FileExists(path))
+            if (!FileSystem.FileExists(path))
                 return false;
 
             // Delete the file, plus any directories left empty afterwards
@@ -163,7 +157,7 @@ namespace Sharp.BlobStorage.File
             {
                 try
                 {
-                    _fileSystem.DeleteFile(path);
+                    FileSystem.DeleteFile(path);
                     return;
                 }
                 catch (DirectoryNotFoundException) // : IOException
@@ -202,7 +196,7 @@ namespace Sharp.BlobStorage.File
                 // Delete directory with best effort.  Do not report errors
                 // (ex: directory not empty), because the delete operation has
                 // succeeded at this point.
-                try { _fileSystem.DeleteDirectory(path); } catch { return; }
+                try { FileSystem.DeleteDirectory(path); } catch { return; }
             }
         }
 
