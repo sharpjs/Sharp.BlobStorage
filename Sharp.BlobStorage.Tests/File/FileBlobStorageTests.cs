@@ -31,12 +31,12 @@ namespace Sharp.BlobStorage.File
     {
         const string TestText = "Testing, testing, one two three.";
 
-        private FileBlobStorageConfiguration Configuration;
-
         private static readonly Encoding Utf8 = new UTF8Encoding(
             encoderShouldEmitUTF8Identifier: false, // no BOM
             throwOnInvalidBytes:             true
         );
+
+        private FileBlobStorageConfiguration Configuration;
 
         [SetUp]
         public void SetUp()
@@ -321,17 +321,21 @@ namespace Sharp.BlobStorage.File
                 .Should().Throw<ArgumentException>();
         }
 
+        // File helpers
+
         private bool FileExists(string path)
             => File_.Exists(Path.Combine(Configuration.Path, path));
-
-        private void WriteFile(string path)
-            => File_.WriteAllText(Path.Combine(Configuration.Path, path), TestText, Utf8);
 
         private string ReadFile(string path)
             => File_.ReadAllText(Path.Combine(Configuration.Path, path), Utf8);
 
+        private void WriteFile(string path)
+            => File_.WriteAllText(Path.Combine(Configuration.Path, path), TestText, Utf8);
+
         private void DeleteFile(string path)
             => File_.Delete(Path.Combine(Configuration.Path, path));
+
+        // Directory helpers
 
         private bool DirectoryExists(string path)
             => Directory.Exists(Path.Combine(Configuration.Path, path));
