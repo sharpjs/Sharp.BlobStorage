@@ -43,9 +43,10 @@ namespace Sharp.BlobStorage.File
         [SetUp]
         public void SetUp()
         {
+            var context = TestContext.CurrentContext;
+
             var path = Path.Combine(
-                TestContext.CurrentContext.WorkDirectory,
-                "Blobs"
+                context.WorkDirectory, "Blobs", context.Test.MethodName
             );
 
             Configuration = new FileBlobStorageConfiguration
