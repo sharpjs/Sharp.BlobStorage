@@ -123,6 +123,24 @@ namespace Sharp.BlobStorage.File
             }
         }
 
+        /// <inheritdoc />
+        public override async Task<bool> DeleteAsync(Uri uri)
+        {
+            var path = uri
+                .ChangeBase(BaseUri, _baseUri) // also validates uri
+                .LocalPath;
+
+            // Check for existence first, as File_.Delete does not return any
+            // indicator of prior existence.  Does not throw.
+            if (!File_.Exists(path))
+                return false;
+
+            // Delete the file, plus any directories left empty afterwards
+            await DeleteFileAsync(path);
+            CleanUpSubdirectories(path);
+            return true;
+        }
+
         private Stream OpenFileForRead(string path)
             => new FileStream(
                 path, FileMode.Open, FileAccess.Read, FileShare.Read,
@@ -137,5 +155,67 @@ namespace Sharp.BlobStorage.File
 
         private static string GenerateFileName(string extension)
             => RandomFileNames.Next(separator: '\\', extension);
+
+        private async Task DeleteFileAsync(string path)
+        {
+            const int
+                RetryLimit  = 3,
+                RetryWaitMs = 10 * 1000;
+
+            for (var retries = 0;; retries++)
+            {
+                try
+                {
+                    File_.Delete(path);
+                    return;
+                }
+                catch (DirectoryNotFoundException) // : IOException
+                {
+                    // Consider 'not found' same as deleted
+                    return;
+                }
+                catch (PathTooLongException) // : IOException
+                {
+                    // Retry would not help
+                    throw;
+                }
+                catch (IOException)
+                {
+                    // File in use
+                    if (retries >= RetryLimit)
+                        throw;
+                }
+
+                // Allow time for retryable condition to pass
+                await Task.Delay(RetryWaitMs);
+            }
+        }
+
+        private void CleanUpSubdirectories(string path)
+        {
+            for (;;)
+            {
+                // Go up to parent directory
+                path = Path.GetDirectoryName(path);
+
+                // Stop when the repository base path is reached
+                if (!IsSubdirectory(path))
+                    return;
+
+                // Delete directory with best effort.  Do not report errors
+                // (ex: directory not empty), because the delete operation has
+                // succeeded at this point.
+                try { Directory.Delete(path); } catch { return; }
+            }
+        }
+
+        private bool IsSubdirectory(string path)
+        {
+            const StringComparison Comparison
+                = StringComparison.OrdinalIgnoreCase;
+
+            return path.StartsWith(_basePath, Comparison)
+                && path.Length > _basePath.Length;
+        }
     }
 }

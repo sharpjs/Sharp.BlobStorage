@@ -202,5 +202,83 @@ namespace Sharp.BlobStorage.Azure
                 return storage.PutAsync(stream, ".dat");
             });
         }
+
+        [Test]
+        public async Task DeleteAsync_Exists()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = BlobUriFor("a/b/file.txt", storage);
+
+            await WriteBlobAsync("a/b/file.txt");
+            await WriteBlobAsync("a/other.txt");
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeTrue();
+
+            (await BlobExistsAsync("a/b/file.txt"))
+                .Should().BeFalse("blob should have been deleted");
+
+            (await BlobExistsAsync("a/other.txt"))
+                .Should().BeTrue("other blob should NOT have been deleted");
+        }
+
+        [Test]
+        public async Task DeleteAsync_DoesNotExist()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = BlobUriFor("a/b/file.txt", storage);
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeFalse();
+        }
+
+        [Test]
+        public void DeleteAsync_NullUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+
+            storage
+                .Awaiting(s => s.DeleteAsync(null))
+                .Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void DeleteAsync_RelativeUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri("relative/file.txt", UriKind.Relative);
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<ArgumentException>();
+        }
+
+        [Test]
+        public void DeleteAsync_NotMyUri()
+        {
+            var storage = new AzureBlobStorage(Configuration);
+            var uri     = new Uri(@"some://other/base/file.txt");
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<ArgumentException>();
+        }
+
+        private Task<bool> BlobExistsAsync(string path)
+            => Container
+                .GetBlockBlobReference(path)
+                .ExistsAsync();
+
+        private Task WriteBlobAsync(string path)
+            => Container
+                .GetBlockBlobReference(path)
+                .UploadTextAsync(TestText, Utf8, null, null, null);
+
+        private Uri BlobUriFor(string path, AzureBlobStorage storage)
+            => Container
+                .GetBlockBlobReference(path).Uri
+                .ChangeBase(Container.Uri.EnsurePathTrailingSlash(), storage.BaseUri);
     }
 }

@@ -22,6 +22,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using Sharp.BlobStorage.Internal;
+using File_ = System.IO.File;
 using static System.IO.File;
 
 namespace Sharp.BlobStorage.File
@@ -256,5 +257,81 @@ namespace Sharp.BlobStorage.File
                 Delete(Configuration.Path);
             }
         }
+
+        [Test]
+        public async Task DeleteAsync_Exists()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, @"a/b/file.txt");
+
+            CreateDirectory (@"a\b");
+            WriteFile       (@"a\b\file.txt");
+            WriteFile       (@"a\other.txt");
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeTrue();
+
+            FileExists      (@"a\b\file.txt") .Should().BeFalse("file should have been deleted");
+            FileExists      (@"a\other.txt")  .Should().BeTrue ("other file should NOT have been deleted");
+            DirectoryExists (@"a\b")          .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"a")            .Should().BeTrue ("non-empty subdirectory should NOT have been deleted");
+            DirectoryExists (@"")             .Should().BeTrue ("repository base directory should NOT have been deleted");
+        }
+
+        [Test]
+        public async Task DeleteAsync_DoesNotExist()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(storage.BaseUri, @"a/b/file.txt");
+
+            var result = await storage.DeleteAsync(uri);
+
+            result.Should().BeFalse();
+        }
+
+        [Test]
+        public void DeleteAsync_NullUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+
+            storage
+                .Awaiting(s => s.DeleteAsync(null))
+                .Should().Throw<ArgumentNullException>();
+        }
+
+        [Test]
+        public void DeleteAsync_RelativeUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri("relative/file.txt", UriKind.Relative);
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<ArgumentException>();
+        }
+
+        [Test]
+        public void DeleteAsync_NotMyUri()
+        {
+            var storage = new FileBlobStorage(Configuration);
+            var uri     = new Uri(@"some://other/base/file.txt");
+
+            storage
+                .Awaiting(s => s.DeleteAsync(uri))
+                .Should().Throw<ArgumentException>();
+        }
+
+        private bool FileExists(string path)
+            => File_.Exists(Path.Combine(Configuration.Path, path));
+
+        private void WriteFile(string path)
+            => File_.WriteAllText(Path.Combine(Configuration.Path, path), TestText, Utf8);
+
+        private bool DirectoryExists(string path)
+            => Directory.Exists(Path.Combine(Configuration.Path, path));
+
+        private void CreateDirectory(string path)
+            => Directory.CreateDirectory(Path.Combine(Configuration.Path, path));
     }
 }

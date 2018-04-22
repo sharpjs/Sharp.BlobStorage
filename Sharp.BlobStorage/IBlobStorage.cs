@@ -60,5 +60,25 @@ namespace Sharp.BlobStorage
         ///   The task's <c>Result</c> is a stream of the blob's content.
         /// </returns>
         Task<Stream> GetAsync(Uri uri);
+
+        /// <summary>
+        ///   Deletes a blob if it exists.
+        /// </summary>
+        /// <param name="uri">A URI that identifies the blob.</param>
+        /// <returns>
+        ///   <c>true</c> if the blob existed; <c>false</c> otherwise.
+        /// </returns>
+        bool Delete(Uri uri);
+
+        /// <summary>
+        ///   Deletes a blob asynchronously if it exists.
+        /// </summary>
+        /// <param name="uri">A URI that identifies the blob.</param>
+        /// <returns>
+        ///   A task that represents the asynchronous deletion operation.
+        ///   The task's <c>Result</c> is <c>true</c> if the blob existed;
+        ///   <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> DeleteAsync(Uri uri);
     }
 }

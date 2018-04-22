@@ -110,6 +110,16 @@ namespace Sharp.BlobStorage.Azure
             return blob.Uri.ChangeBase(_baseUri, BaseUri);
         }
 
+        /// <inheritdoc/>
+        public override Task<bool> DeleteAsync(Uri uri)
+        {
+            uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
+
+            var blob = new CloudBlockBlob(uri, _account.Credentials);
+
+            return blob.DeleteIfExistsAsync();
+        }
+
         private static string GenerateFileName(string extension)
             => RandomFileNames.Next(separator: '/', extension);
 

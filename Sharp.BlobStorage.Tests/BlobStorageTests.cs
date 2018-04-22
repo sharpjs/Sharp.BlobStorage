@@ -38,6 +38,9 @@ namespace Sharp.BlobStorage
 
             public override Task<Uri> PutAsync(Stream stream, string extension = null)
                 => throw new NotImplementedException();
+
+            public override Task<bool> DeleteAsync(Uri uri)
+                => throw new NotImplementedException();
         }
 
         [Test]
@@ -148,6 +151,28 @@ namespace Sharp.BlobStorage
             var result = storage.Object.Get(uri);
             
             result.Should().BeSameAs(stream.Object);
+            storage.Verify();
+        }
+
+        [Test]
+        public void Delete()
+        {
+            var configuration = new TestConfiguration();
+            var storage       = new Mock<BlobStorage>(MockBehavior.Strict, configuration);
+            var uri           = new Uri(BlobStorage.DefaultBaseUri + "TestFile.txt");
+
+            storage
+                .Setup(s => s.Delete(It.IsAny<Uri>()))
+                .CallBase();
+
+            storage
+                .Setup(s => s.DeleteAsync(uri))
+                .ReturnsAsync(true)
+                .Verifiable();
+
+            var result = storage.Object.Delete(uri);
+
+            result.Should().BeTrue();
             storage.Verify();
         }
     }

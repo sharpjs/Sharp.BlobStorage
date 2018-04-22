@@ -81,5 +81,15 @@ namespace Sharp.BlobStorage
 
         /// <inheritdoc/>
         public abstract Task<Uri> PutAsync(Stream stream, string extension = null);
+
+        /// <inheritdoc/>
+        public virtual bool Delete(Uri uri)
+        {
+            using (new AsyncScope())
+                return DeleteAsync(uri).Result;
+        }
+
+        /// <inheritdoc/>
+        public abstract Task<bool> DeleteAsync(Uri uri);
     }
 }
