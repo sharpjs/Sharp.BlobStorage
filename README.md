@@ -4,7 +4,7 @@ A very simple .NET interface to blob storage.
 
 ## Status
 
-**Experimental.**
+**Private Beta Testing.**
 
 ## Notes
 
