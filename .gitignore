@@ -8,6 +8,12 @@ bin/
 .vs/
 *.user
 
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
 # Local Files
 /Local.props
 
