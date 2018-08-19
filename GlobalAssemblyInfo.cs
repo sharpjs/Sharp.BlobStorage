@@ -30,7 +30,7 @@ using System.Security;
 #endif
 
 // Visibility
-[assembly: InternalsVisibleTo("RSMassTransit.Client.Tests")]
+[assembly: InternalsVisibleTo("Sharp.BlobStorage.Tests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
                             // ^^^^^^^^^^^^^^^^^^^^^^^^
                             // Required for Moq to mock a class with an internal abstract method.
