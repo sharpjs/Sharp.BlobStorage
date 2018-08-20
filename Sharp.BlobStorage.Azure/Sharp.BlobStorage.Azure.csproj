@@ -26,8 +26,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sharp.BlobStorage" Version="$(Version)" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" />
+    <PackageReference Include="Sharp.BlobStorage" Version="[$(Version)]" />
+    <PackageReference Include="WindowsAzure.Storage" Version="[9.3.1,10.0.0)" />
   </ItemGroup>
 
 </Project>
