@@ -18,7 +18,7 @@
 
   <PropertyGroup>
     <Product>Sharp.BlobStorage</Product>
-    <Version>0.0.0-local</Version>
+    <Version>0.1.0-local</Version>
     <Authors>Jeffrey Sharp</Authors>
     <Copyright>Copyright 2018 Jeffrey Sharp</Copyright>
     <PackageLicenseUrl>https://github.com/sharpjs/Sharp.BlobStorage/blob/master/LICENSE.txt</PackageLicenseUrl>
