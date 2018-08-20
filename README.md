@@ -123,6 +123,10 @@ Given a blob URI, it is possible to delete the blob.
 
 ```csharp
 var existed = storage.Delete(uri);
+
+// or
+
+var existed = await storage.DeleteAsync(uri);
 ```
 
 The method succeeds regardless of whether the blob exists.  If the blob exists
