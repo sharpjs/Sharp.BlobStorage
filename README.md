@@ -7,7 +7,10 @@ A very simple .NET interface to blob storage.  Supports these providers:
 
 ## Status
 
-In production use.
+In limited production use.  Available as NuGet packages:
+
+* [Sharp.BlobStorage](https://www.nuget.org/packages/Sharp.BlobStorage)
+* [Sharp.BlobStorage.Azure](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
 
 ## Usage
 
