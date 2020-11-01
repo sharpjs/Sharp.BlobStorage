@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.Build.NoTargets/2.0.1">
+  <!-- https://github.com/microsoft/MSBuildSdks/tree/master/src/NoTargets -->
 
   <!--
     Copyright 2020 Jeffrey Sharp
@@ -17,17 +18,20 @@
   -->
 
   <PropertyGroup>
-    <Description>Test suite for Sharp.BlobStorage</Description>
-    <TargetFrameworks>net48</TargetFrameworks>
-    <RootNamespace>Sharp.BlobStorage</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+    <IsPublishable>false</IsPublishable>
+    <IsPackable>false</IsPackable>
+    <SetGitHubActionsVersion>true</SetGitHubActionsVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sharp.BlobStorage\Sharp.BlobStorage.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Subatomix.Testing" Version="1.0.0-rc.1" />
+    <None Include="**" Exclude=".git;Sharp*\**;dist\**;coverage\**;$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(MSBuildThisFile)" />
+    <None Include=".*\**" Exclude=".git\**;.vs\**" />
   </ItemGroup>
 
 </Project>

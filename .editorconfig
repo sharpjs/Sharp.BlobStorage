@@ -1,0 +1,29 @@
+# Documentation:
+# https://editorconfig.org
+# https://aka.ms/editorconfigdocs
+
+root = true
+
+[*]
+charset = utf-8
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.sln]
+charset = utf-8-bom
+indent_style = tab
+
+[.root.targets]
+charset = utf-8-bom
+
+[*.*proj]
+charset = utf-8-bom
+
+[*.{config,json,jsonc,md,*proj,props,runsettings,targets,xml,yaml,yml}]
+indent_size = 2
+
+[*.cs]
+csharp_space_after_cast = true
+dotnet_sort_system_directives_first = true

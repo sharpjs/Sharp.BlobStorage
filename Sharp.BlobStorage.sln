@@ -1,21 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage", "Sharp.BlobStorage\Sharp.BlobStorage.csproj", "{D270238E-7159-4119-8C72-70121F8C0073}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = ".root", ".root.targets", "{00A0AB33-2B87-44E3-945E-AD1E0C2B4B98}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C6C045F4-63DA-4DF5-A696-712EA760592D}"
-	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		General.props = General.props
-		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
-		LICENSE.txt = LICENSE.txt
-		NuGet.config = NuGet.config
-		README.md = README.md
-		Set-Version.ps1 = Set-Version.ps1
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage", "Sharp.BlobStorage\Sharp.BlobStorage.csproj", "{D270238E-7159-4119-8C72-70121F8C0073}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BlobStorage.Tests", "Sharp.BlobStorage.Tests\Sharp.BlobStorage.Tests.csproj", "{3CAF5876-D4AB-4075-AD6E-9E2A264A627F}"
 EndProject
@@ -32,6 +22,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00A0AB33-2B87-44E3-945E-AD1E0C2B4B98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00A0AB33-2B87-44E3-945E-AD1E0C2B4B98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00A0AB33-2B87-44E3-945E-AD1E0C2B4B98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00A0AB33-2B87-44E3-945E-AD1E0C2B4B98}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D270238E-7159-4119-8C72-70121F8C0073}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D270238E-7159-4119-8C72-70121F8C0073}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D270238E-7159-4119-8C72-70121F8C0073}.Release|Any CPU.ActiveCfg = Release|Any CPU

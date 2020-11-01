@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Show C# method names in diff chunk headers
+# Visual Studio diff
 *.cs diff=csharp
