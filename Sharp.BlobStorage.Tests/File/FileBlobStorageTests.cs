@@ -250,7 +250,7 @@ namespace Sharp.BlobStorage.File
                     storage
                         .Awaiting(s => s.PutAsync(stream, ".txt"))
                         .Should().Throw<IOException>()
-                        .Which.Message.Should().Contain("with the same name already exists");
+                        .Which.Message.Should().Contain("already exists");
                 }
             }
             finally
