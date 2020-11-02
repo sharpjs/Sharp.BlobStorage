@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2018 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
@@ -18,29 +18,36 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using FluentAssertions;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Moq;
 using NUnit.Framework;
 using Sharp.BlobStorage.Internal;
 
 namespace Sharp.BlobStorage.Azure
 {
-    [TestFixture]
+    using static FluentActions;
+
+    [TestFixture, NonParallelizable]
     public class AzureBlobStorageTests
     {
+        #region SetUp/TearDown
+
         const string TestText = "Testing, testing, one two three.";
 
-        private static readonly Encoding Utf8 = new UTF8Encoding(
-            encoderShouldEmitUTF8Identifier: false, // no BOM
-            throwOnInvalidBytes:             true
-        );
+        private static readonly Encoding
+            Utf8 = new UTF8Encoding(
+                encoderShouldEmitUTF8Identifier: false, // no BOM
+                throwOnInvalidBytes:             true
+            );
+
+        private static readonly byte[]
+            TestBytes = Utf8.GetBytes(TestText);
 
         private AzureBlobStorageConfiguration Configuration;
-        private CloudStorageAccount           Account;
-        private CloudBlobClient               Client;
-        private CloudBlobContainer            Container;
+        private BlobContainerClient           Container;
 
         [SetUp]
         public void SetUp()
@@ -62,9 +69,10 @@ namespace Sharp.BlobStorage.Azure
                 ContainerName    = name,
             };
 
-            Account   = CloudStorageAccount.Parse(Configuration.ConnectionString);
-            Client    = Account.CreateCloudBlobClient();
-            Container = Client.GetContainerReference(Configuration.ContainerName);
+            Container = new BlobContainerClient(
+                Configuration.ConnectionString,
+                Configuration.ContainerName
+            );
 
             Container.DeleteIfExists();
             Container.Create();
@@ -75,6 +83,9 @@ namespace Sharp.BlobStorage.Azure
         {
             Container.DeleteIfExists();
         }
+
+        #endregion
+        #region Construct
 
         [Test]
         public void Construct_NullConfiguration()
@@ -103,6 +114,9 @@ namespace Sharp.BlobStorage.Azure
                 .Should().Throw<ArgumentNullException>();
         }
 
+        #endregion
+        #region GetAsync
+
         [Test]
         public async Task GetAsync()
         {
@@ -111,15 +125,11 @@ namespace Sharp.BlobStorage.Azure
 
             await WriteBlobAsync("a/file.txt");
 
-            byte[] bytes;
-            using (var stream = await storage.GetAsync(uri))
-            using (var memory = new MemoryStream())
-            {
-                await stream.CopyToAsync(memory);
-                bytes = memory.ToArray();
-            }
+            using var stream = await storage.GetAsync(uri);
 
-            Utf8.GetString(bytes).Should().Be(TestText);
+            var text = await ReadUtf8Async(stream);
+
+            text.Should().Be(TestText);
         }
 
         [Test]
@@ -160,10 +170,16 @@ namespace Sharp.BlobStorage.Azure
             var storage = new AzureBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "does/not/exist.txt");
 
-            storage
-                .Awaiting(s => s.GetAsync(uri))
-                .Should().Throw<StorageException>();
+            async Task<string> GetAsync()
+                => await ReadUtf8Async(await storage.GetAsync(uri));
+
+            Awaiting(GetAsync).Should()
+                .Throw<RequestFailedException>()
+                .Which.Status.Should().Be(404);
         }
+
+        #endregion
+        #region PutAsync
 
         [Test]
         [TestCase( "txt")]
@@ -171,18 +187,20 @@ namespace Sharp.BlobStorage.Azure
         public async Task PutAsync(string extension)
         {
             var storage = new AzureBlobStorage(Configuration);
-            var bytes   = Utf8.GetBytes(TestText);
 
             Uri uri;
-            using (var stream = new MemoryStream(bytes))
+            using (var stream = new MemoryStream(TestBytes))
                 uri = await storage.PutAsync(stream, extension);
 
-            uri              .Should().NotBeNull();
-            uri              .Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
-            uri.AbsolutePath .Should().EndWith(".txt");
+            uri.Should().NotBeNull();
+            uri.Should().Match<Uri>(u => storage.BaseUri.IsBaseOf(u));
 
-            var blobUri = BlobUri(uri, storage);
-            var text    = await ReadBlobAsync(blobUri);
+            uri.AbsolutePath.Should().MatchRegex(
+                @"^/[0-9]{4}/[0-9]{4}/[0-9]{8}_[0-9]{6}_[0-9a-fA-F]{8}\.txt$"
+            );
+
+            var name = GetBlobName(uri, storage);
+            var text = await ReadBlobAsync(name);
             text.Should().Be(TestText);
         }
 
@@ -207,6 +225,9 @@ namespace Sharp.BlobStorage.Azure
                 .Should().Throw<ArgumentException>();
         }
 
+        #endregion
+        #region DeleteAsync
+
         [Test]
         public async Task DeleteAsync_Exists()
         {
@@ -216,7 +237,7 @@ namespace Sharp.BlobStorage.Azure
             await WriteBlobAsync("a/b/file.txt");
             await WriteBlobAsync("a/other.txt" );
 
-            (await BlobExistsAsync ("a/b/file.txt"))
+            (await BlobExistsAsync("a/b/file.txt"))
                 .Should().BeTrue("blob should exist prior to deletion");
 
             var result = await storage.DeleteAsync(uri);
@@ -273,27 +294,47 @@ namespace Sharp.BlobStorage.Azure
                 .Should().Throw<ArgumentException>();
         }
 
-        // Blob helpers
+        #endregion
+        #region Helpers
 
-        private Uri BlobUri(Uri uri, AzureBlobStorage storage)
-            => uri
-                .ChangeBase(
-                    storage.BaseUri,
-                    Container.Uri.EnsurePathTrailingSlash()
-                );
+        private static string GetBlobName(Uri uri, AzureBlobStorage storage)
+        {
+            return uri.ToRelative(storage.BaseUri).ToString();
+        }
 
-        private Task<bool> BlobExistsAsync(string path)
-            => Container
-                .GetBlockBlobReference(path)
-                .ExistsAsync();
+        private async Task<bool> BlobExistsAsync(string name)
+        {
+            var result = await Container.GetBlockBlobClient(name).ExistsAsync();
 
-        private Task<string> ReadBlobAsync(Uri uri)
-            => new CloudBlockBlob(uri, Account.Credentials)
-                .DownloadTextAsync(Utf8, null, null, null);
+            return result.Value;
+        }
 
-        private Task WriteBlobAsync(string path)
-            => Container
-                .GetBlockBlobReference(path)
-                .UploadTextAsync(TestText, Utf8, null, null, null);
+        private async Task<string> ReadBlobAsync(string name)
+        {
+            var response = await Container.GetBlobClient(name).DownloadAsync();
+
+            return await ReadUtf8Async(response.Value.Content);
+        }
+
+        private async Task WriteBlobAsync(string name)
+        {
+            using var memory = new MemoryStream(TestBytes);
+
+            await Container.GetBlobClient(name).UploadAsync(memory);
+        }
+
+        private static async Task<string> ReadUtf8Async(Stream stream)
+        {
+            using var reader = new StreamReader(
+                stream,
+                Utf8,
+                detectEncodingFromByteOrderMarks: false,
+                bufferSize: TestText.Length
+            );
+
+            return await reader.ReadToEndAsync();
+        }
+
+        #endregion
     }
 }

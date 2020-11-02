@@ -1,5 +1,5 @@
-﻿/*
-    Copyright (C) 2018 Jeffrey Sharp
+/*
+    Copyright 2020 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
     purpose with or without fee is hereby granted, provided that the above
@@ -16,14 +16,12 @@
 
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.RetryPolicies;
+using Azure;
+using Azure.Storage;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Sharp.BlobStorage.Internal;
-
-[assembly: InternalsVisibleTo("Sharp.BlobStorage.Azure.Tests")]
 
 namespace Sharp.BlobStorage.Azure
 {
@@ -33,10 +31,7 @@ namespace Sharp.BlobStorage.Azure
     /// </summary>
     public class AzureBlobStorage : BlobStorage
     {
-        private readonly CloudStorageAccount _account;
-        private readonly CloudBlobClient     _client;
-        private readonly CloudBlobContainer  _container;
-        private readonly Uri                 _baseUri;
+        private readonly BlobContainerClient _container;
 
         /// <summary>
         ///   Creates a new <see cref="AzureBlobStorage"/> instance with the
@@ -57,28 +52,23 @@ namespace Sharp.BlobStorage.Azure
             if (configuration.ContainerName == null)
                 throw new ArgumentNullException("configuration.ContainerName");
 
-            _account = CloudStorageAccount.Parse(configuration.ConnectionString);
-
-            _client = _account.CreateCloudBlobClient();
-            _client.DefaultRequestOptions = RequestOptions;
-
-            _container = _client.GetContainerReference(configuration.ContainerName);
-            _baseUri   = _container.Uri.EnsurePathTrailingSlash();
+            _container = new BlobContainerClient(
+                configuration.ConnectionString,
+                configuration.ContainerName
+            );
 
             //Log.Information("Using Azure blob storage: {0}", _container.Uri);
-
-            using (new AsyncScope())
-                _container.CreateIfNotExistsAsync().Wait();
+            _container.CreateIfNotExists();
         }
 
         /// <inheritdoc/>
         public override Task<Stream> GetAsync(Uri uri)
         {
-            uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
+            var name = GetBlobName(uri); // also validates uri
+            var blob = _container.GetBlobClient(name);
 
-            var blob = new CloudBlockBlob(uri, _account.Credentials);
-            blob.StreamMinimumReadSizeInBytes = DownloadBlockSizeInBytes;
-            return blob.OpenReadAsync();
+            //Log.Information("Downloading blob: {0}", name);
+            return blob.OpenReadAsync(DownloadOptions);
         }
 
         /// <inheritdoc/>
@@ -94,75 +84,60 @@ namespace Sharp.BlobStorage.Azure
                 extension = "." + extension;
 
             var name = GenerateFileName(extension);
+            var blob = _container.GetBlobClient(name);
 
             //Log.Information("Uploading blob: {0}", name);
+            await blob.UploadAsync(stream, UploadOptions);
 
-            var blob = _container.GetBlockBlobReference(name);
-            blob.StreamWriteSizeInBytes = UploadBlockSizeInBytes;
-
-            await blob.UploadFromStreamAsync(
-                stream,
-                AccessCondition.GenerateIfNotExistsCondition(),
-                options:          null,
-                operationContext: null
-            );
-
-            return blob.Uri.ChangeBase(_baseUri, BaseUri);
+            // NOTE: Azure SDK percent-encodes the slashes in `name`, but this
+            // library returns URIs with slashes unencoded.  Therefore, do not
+            // use `blob.Uri` here; construct the URI explicitly.
+            return new Uri(BaseUri, blob.Name);
         }
 
         /// <inheritdoc/>
-        public override Task<bool> DeleteAsync(Uri uri)
+        public override async Task<bool> DeleteAsync(Uri uri)
         {
-            uri = uri.ChangeBase(BaseUri, _baseUri); // also validates uri
+            var name = GetBlobName(uri); // also validates uri
+            var blob = _container.GetBlobClient(name);
 
-            var blob = new CloudBlockBlob(uri, _account.Credentials);
+            //Log.Information("Deleting blob: {0}", name);
+            var response = await blob.DeleteIfExistsAsync();
 
-            return blob.DeleteIfExistsAsync();
+            return response.Value;
         }
 
         private static string GenerateFileName(string extension)
             => RandomFileNames.Next(separator: '/', extension);
 
-        private const int
-            DownloadBlockSizeInBytes = 1 * 1024 * 1024, // block size in multi-block download
-            UploadBlockSizeInBytes   = 1 * 1024 * 1024; // block size in multi-block upload (see below)
+        private string GetBlobName(Uri uri)
+            => uri.ToRelative(BaseUri).ToString();
 
-        private static readonly BlobRequestOptions
-            RequestOptions = new BlobRequestOptions
+        // Default client options include:
+        // - Timeout after 100 seconds for individual network operations
+        // - Up to 3 retries
+        // - Initial retry delay of  0.8 seconds, increasing exponentially
+        // - Maximum retry delay of 60.0 seconds
+
+        private static readonly BlobUploadOptions
+            UploadOptions = new BlobUploadOptions
             {
-                // Official documentation:
-                // https://docs.microsoft.com/en-us/dotnet/api/microsoft.windowsazure.storage.blob.blobrequestoptions?view=azure-dotnet
-                //
-                // Better documentation:
-                // https://www.red-gate.com/simple-talk/cloud/platform-as-a-service/azure-blob-storage-part-4-uploading-large-blobs/
+                Conditions = new BlobRequestConditions
+                {
+                    IfNoneMatch = ETag.All                  // Do not overwrite blob with same name
+                },
+                TransferOptions = new StorageTransferOptions
+                {
+                    MaximumConcurrency  = 1,                // Concurrent uploads for this instance
+                    InitialTransferSize = 2 * 1024 * 1024,  // 2 MiB threshold for multi-block upload
+                    MaximumTransferSize = 1 * 1024 * 1024   // 1 MiB block size in multi-block upload
+                }
+            };
 
-                // Minimum upload speeds to prevent timeout:
-                // * 68 KB/s for blobs <  2MB
-                // * 34 KB/s for blobs >= 2MB
-
-                // Splitting
-                ParallelOperationThreadCount     = 1,               // concurrent uploads
-                SingleBlobUploadThresholdInBytes = 2 * 1024 * 1024, // threshold for multi-block upload
-                //blob.StreamWriteSizeInBytes    = 1 * 1024 * 1024, // block size in multi-block upload
-
-                // Timeouts
-                ServerTimeout        = TimeSpan.FromSeconds(30),    // individual request timeout
-                MaximumExecutionTime = null,                        // overall operation timeout
-
-                // Retries
-                RetryPolicy = new ExponentialRetry(
-                    deltaBackoff: TimeSpan.FromSeconds(5),
-                    maxAttempts:  3
-                ),
-
-                // Hashing
-                StoreBlobContentMD5  = true,    // calculate and store hash of uploaded blob
-                UseTransactionalMD5  = false,   // do not validate hash of every request; HTTPS does this
-
-                // Defaults taken for other properties:
-                // * AbsorbConditionalErrorsOnRetry (not applicable)
-                // * DisableContentMD5Validation    (not applicable)
-                // * LocationMode                   (not applicable)
+        private static readonly BlobOpenReadOptions
+            DownloadOptions = new BlobOpenReadOptions(allowModifications: false)
+            {
+                BufferSize = 1 * 1024 * 1024                // 1 MiB block size for download
             };
     }
 }

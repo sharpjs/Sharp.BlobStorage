@@ -18,8 +18,9 @@
 
   <PropertyGroup>
     <Description>Test suite for Sharp.BlobStorage.Azure</Description>
-    <TargetFrameworks>net48</TargetFrameworks>
+    <TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>
     <RootNamespace>Sharp.BlobStorage.Azure</RootNamespace>
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +29,6 @@
 
   <ItemGroup>
     <PackageReference Include="Subatomix.Testing" Version="1.0.0-rc.1" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.1" />
   </ItemGroup>
 
 </Project>

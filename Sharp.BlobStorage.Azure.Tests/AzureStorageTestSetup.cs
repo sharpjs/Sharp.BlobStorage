@@ -1,5 +1,5 @@
-﻿/*
-    Copyright (C) 2018 Jeffrey Sharp
+/*
+    Copyright 2020 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
     purpose with or without fee is hereby granted, provided that the above
@@ -21,22 +21,22 @@ namespace Sharp.BlobStorage.Azure
     [SetUpFixture]
     public class AzureStorageTestSetup
     {
-        private bool _emulatorWasRunning;
+        private bool _azuriteWasRunning;
 
         [OneTimeSetUp]
         public void SetUp()
         {
-            _emulatorWasRunning = AzureStorageEmulator.IsRunning;
+            _azuriteWasRunning = Azurite.IsRunning;
 
-            if (!_emulatorWasRunning)
-                AzureStorageEmulator.Start();
+            if (!_azuriteWasRunning)
+                Azurite.Start();
         }
 
         [OneTimeTearDown]
         public void TearDown()
         {
-            if (!_emulatorWasRunning)
-                AzureStorageEmulator.Stop();
+            if (!_azuriteWasRunning)
+                Azurite.Stop();
         }
     }
 }
