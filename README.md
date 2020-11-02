@@ -2,15 +2,19 @@
 
 A very simple .NET interface to blob storage.  Supports these providers:
 
-* The file system
-* Azure Storage blob containers
+- The file system
+- Azure Storage blob containers
 
 ## Status
 
-In limited production use.  Available as NuGet packages:
+Available as NuGet packages:
 
-* [Sharp.BlobStorage](https://www.nuget.org/packages/Sharp.BlobStorage)
-* [Sharp.BlobStorage.Azure](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
+- [Sharp.BlobStorage](https://www.nuget.org/packages/Sharp.BlobStorage)
+- [Sharp.BlobStorage.Azure](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
+
+Versions:
+- 0.1.0 has been used in production for several years with no issues reported.
+- 1.0.0 is in development.
 
 ## Usage
 
@@ -137,5 +141,5 @@ and is deleted, the method returns `true`; otherwise, `false`.
 
 ## Notes
 
-* To test Azure storage support, [Azure Storage Emulator](https://docs.microsoft.com/en-ca/azure/storage/common/storage-use-emulator) v5.6 or later is required.
+- To test Azure storage support, a working `docker` command is required.
 
