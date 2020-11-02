@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2018 Jeffrey Sharp
 
     Permission to use, copy, modify, and distribute this software for any
@@ -137,7 +137,7 @@ namespace Sharp.BlobStorage.File
             var uri     = new Uri(storage.BaseUri, "a/file.txt");
 
             CreateDirectory (@"a");
-            WriteFile       (@"a\file.txt");
+            WriteFile       (@"a", "file.txt");
 
             byte[] bytes;
             using (var stream = await storage.GetAsync(uri))
@@ -265,18 +265,18 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
-            CreateDirectory (@"a\b");
-            WriteFile       (@"a\b\file.txt");
-            FileExists      (@"a\b\file.txt") .Should().BeTrue("file should exist prior to deletion");
+            CreateDirectory (@"a", "b");
+            WriteFile       (@"a", "b", "file.txt");
+            FileExists      (@"a", "b", "file.txt") .Should().BeTrue("file should exist prior to deletion");
 
             var result = await storage.DeleteAsync(uri);
 
             result.Should().BeTrue();
 
-            FileExists      (@"a\b\file.txt") .Should().BeFalse("file should have been deleted");
-            DirectoryExists (@"a\b")          .Should().BeFalse("empty subdirectory should have been deleted");
-            DirectoryExists (@"a")            .Should().BeFalse("empty subdirectory should have been deleted");
-            DirectoryExists (@"")             .Should().BeTrue ("repository base directory should NOT have been deleted");
+            FileExists      (@"a", "b", "file.txt") .Should().BeFalse("file should have been deleted");
+            DirectoryExists (@"a", "b")             .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"a")                  .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"")                   .Should().BeTrue ("repository base directory should NOT have been deleted");
         }
 
         [Test]
@@ -285,21 +285,21 @@ namespace Sharp.BlobStorage.File
             var storage = new FileBlobStorage(Configuration);
             var uri     = new Uri(storage.BaseUri, "a/b/file.txt");
 
-            CreateDirectory (@"a\b");
-            WriteFile       (@"a\b\file.txt");
-            WriteFile       (@"a\other.txt"); // <-- additional file
-            FileExists      (@"a\b\file.txt") .Should().BeTrue("file should exist prior to deletion");
-            FileExists      (@"a\other.txt")  .Should().BeTrue("file should exist");
+            CreateDirectory (@"a", "b");
+            WriteFile       (@"a", "b", "file.txt");
+            WriteFile       (@"a", "other.txt");    // <-- additional file
+            FileExists      (@"a", "b", "file.txt") .Should().BeTrue("file should exist prior to deletion");
+            FileExists      (@"a", "other.txt")     .Should().BeTrue("file should exist");
 
             var result = await storage.DeleteAsync(uri);
 
             result.Should().BeTrue();
 
-            FileExists      (@"a\b\file.txt") .Should().BeFalse("file should have been deleted");
-            FileExists      (@"a\other.txt")  .Should().BeTrue ("other file should NOT have been deleted");
-            DirectoryExists (@"a\b")          .Should().BeFalse("empty subdirectory should have been deleted");
-            DirectoryExists (@"a")            .Should().BeTrue ("non-empty subdirectory should NOT have been deleted");
-            DirectoryExists (@"")             .Should().BeTrue ("repository base directory should NOT have been deleted");
+            FileExists      (@"a", "b", "file.txt") .Should().BeFalse("file should have been deleted");
+            FileExists      (@"a", "other.txt")     .Should().BeTrue ("other file should NOT have been deleted");
+            DirectoryExists (@"a", "b")             .Should().BeFalse("empty subdirectory should have been deleted");
+            DirectoryExists (@"a")                  .Should().BeTrue ("non-empty subdirectory should NOT have been deleted");
+            DirectoryExists (@"")                   .Should().BeTrue ("repository base directory should NOT have been deleted");
         }
 
         [Test]
@@ -443,29 +443,32 @@ namespace Sharp.BlobStorage.File
                 )
                 .LocalPath;
 
-        private bool FileExists(string path)
-            => File_.Exists(Path.Combine(Configuration.Path, path));
+        private string MakePath(params string[] path)
+            => Path.Combine(Configuration.Path, Path.Combine(path));
 
-        private string ReadFile(string path)
-            => File_.ReadAllText(Path.Combine(Configuration.Path, path), Utf8);
+        private bool FileExists(params string[] path)
+            => File_.Exists(MakePath(path));
 
-        private void WriteFile(string path)
-            => File_.WriteAllText(Path.Combine(Configuration.Path, path), TestText, Utf8);
+        private string ReadFile(params string[] path)
+            => File_.ReadAllText(MakePath(path), Utf8);
 
-        private void DeleteFile(string path)
-            => File_.Delete(Path.Combine(Configuration.Path, path));
+        private void WriteFile(params string[] path)
+            => File_.WriteAllText(MakePath(path), TestText, Utf8);
+
+        private void DeleteFile(params string[] path)
+            => File_.Delete(MakePath(path));
 
         // Directory helpers
 
-        private bool DirectoryExists(string path)
-            => Directory.Exists(Path.Combine(Configuration.Path, path));
+        private bool DirectoryExists(params string[] path)
+            => Directory.Exists(MakePath(path));
 
-        private void CreateDirectory(string path)
-            => Directory.CreateDirectory(Path.Combine(Configuration.Path, path));
+        private void CreateDirectory(params string[] path)
+            => Directory.CreateDirectory(MakePath(path));
 
-        private void DeleteDirectory(string path)
+        private void DeleteDirectory(params string[] path)
         {
-            try { Directory.Delete(Path.Combine(Configuration.Path, path), recursive: true); }
+            try { Directory.Delete(MakePath(path), recursive: true); }
             catch (DirectoryNotFoundException) { }
         }
     }
