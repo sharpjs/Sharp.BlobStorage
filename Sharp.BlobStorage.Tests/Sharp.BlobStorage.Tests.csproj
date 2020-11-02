@@ -20,6 +20,7 @@
     <Description>Test suite for Sharp.BlobStorage</Description>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Sharp.BlobStorage</RootNamespace>
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
