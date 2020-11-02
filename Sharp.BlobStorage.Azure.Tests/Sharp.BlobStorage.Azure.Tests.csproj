@@ -18,7 +18,7 @@
 
   <PropertyGroup>
     <Description>Test suite for Sharp.BlobStorage.Azure</Description>
-    <TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <RootNamespace>Sharp.BlobStorage.Azure</RootNamespace>
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
   </PropertyGroup>
