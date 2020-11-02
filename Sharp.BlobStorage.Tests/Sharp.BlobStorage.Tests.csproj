@@ -18,7 +18,7 @@
 
   <PropertyGroup>
     <Description>Test suite for Sharp.BlobStorage</Description>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Sharp.BlobStorage</RootNamespace>
   </PropertyGroup>
 
