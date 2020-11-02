@@ -97,7 +97,7 @@ namespace Sharp.BlobStorage.File
         {
             var configuration = new FileBlobStorageConfiguration
             {
-                Path = "<*> not a valid path <*>"
+                Path = "<*> \0 not a valid path \0 <*>"
             };
 
             this.Invoking(c => new FileBlobStorage(configuration))
