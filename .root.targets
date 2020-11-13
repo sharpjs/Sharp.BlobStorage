@@ -30,7 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="**" Exclude=".git;Sharp*\**;dist\**;coverage\**;$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(MSBuildThisFile)" />
+    <None Include="**" Exclude="Sharp.*\**;dist\**;coverage\**;$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);$(MSBuildThisFile)" />
     <None Include=".*\**" Exclude=".git\**;.vs\**" />
   </ItemGroup>
 
