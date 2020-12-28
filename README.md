@@ -7,10 +7,17 @@ A very simple .NET interface to blob storage.  Supports these providers:
 
 ## Status
 
+[![Build](https://github.com/sharpjs/Sharp.BlobStorage/workflows/Build/badge.svg)](https://github.com/sharpjs/Sharp.BlobStorage/actions)
+
 Available as NuGet packages:
 
-- [Sharp.BlobStorage](https://www.nuget.org/packages/Sharp.BlobStorage)
-- [Sharp.BlobStorage.Azure](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
+- [Sharp.BlobStorage](https://www.nuget.org/packages/Sharp.BlobStorage)<br/>
+  [![NuGet](https://img.shields.io/nuget/v/Sharp.BlobStorage.svg)](https://www.nuget.org/packages/Sharp.BlobStorage)
+  [![NuGet](https://img.shields.io/nuget/dt/Sharp.BlobStorage.svg)](https://www.nuget.org/packages/Sharp.BlobStorage)
+
+- [Sharp.BlobStorage.Azure](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)<br/>
+  [![NuGet](https://img.shields.io/nuget/v/Sharp.BlobStorage.Azure.svg)](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
+  [![NuGet](https://img.shields.io/nuget/dt/Sharp.BlobStorage.Azure.svg)](https://www.nuget.org/packages/Sharp.BlobStorage.Azure)
 
 Versions:
 - 0.1.0 has been used in production for several years with no issues reported.
