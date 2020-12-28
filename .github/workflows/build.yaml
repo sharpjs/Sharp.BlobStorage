@@ -81,20 +81,20 @@ jobs:
           reporttypes: Cobertura;HtmlInline;Badges;TeamCitySummary
           verbosity: Warning
 
-      - name: Save Package
-        uses: actions/upload-artifact@v2
-        #url: https://github.com/actions/upload-artifact
-        with:
-          name: Packages
-          path: ${{ runner.temp }}/dist
-          if-no-files-found: error
-
       - name: Save Coverage Report
         uses: actions/upload-artifact@v2
         #url: https://github.com/actions/upload-artifact
         with:
           name: Coverage Report
           path: ${{ runner.temp }}/coverage
+          if-no-files-found: error
+
+      - name: Save Package
+        uses: actions/upload-artifact@v2
+        #url: https://github.com/actions/upload-artifact
+        with:
+          name: Packages
+          path: ${{ runner.temp }}/dist
           if-no-files-found: error
 
       - name: Publish Package
