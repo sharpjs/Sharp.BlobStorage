@@ -45,21 +45,21 @@
 
   <!-- Versioning -->
   <ItemGroup>
-    <PackageReference Include="Subatomix.Build.Versioning.Semantic" Version="0.0.0-pre.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Subatomix.Build.Versioning.Semantic" Version="1.0.0" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- <inheritdoc/> support -->
   <ItemGroup>
-    <PackageReference Include="SauceControl.InheritDoc" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="SauceControl.InheritDoc" Version="1.2.0" PrivateAssets="all" />
   </ItemGroup>
+
+  <!-- SourceLink https://github.com/dotnet/sourcelink/blob/master/README.md -->
+  <ItemGroup Condition="$(IsPackable)">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
   <!--
-    The following is needed to work around this netstandard2.0 bug:
+    InheritDoc: Workaround for this netstandard2.0 bug:
     https://github.com/dotnet/standard/issues/1527
   -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -68,11 +68,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageDownload Include="NETStandard.Library.Ref" Version="[2.1.0]" />
     <InheritDocReference Include="$([MSBuild]::EnsureTrailingSlash('$(NugetPackageRoot)'))netstandard.library.ref\2.1.0\ref\netstandard2.1\netstandard.xml" />
-  </ItemGroup>
-
-  <!-- SourceLink https://github.com/dotnet/sourcelink/blob/master/README.md -->
-  <ItemGroup Condition="$(IsPackable)">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
